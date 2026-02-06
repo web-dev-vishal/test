@@ -23,6 +23,10 @@ import {
     createFinancialRoutes,
     createAdminRoutes,
     createStatusRoutes,
+    createUserRoutes,
+    createWatchlistRoutes,
+    createAlertRoutes,
+    createAssetRoutes,
 } from './presentation/routes/index.js';
 
 /**
@@ -62,6 +66,12 @@ const setupRoutes = (app, container) => {
     app.use('/api/v1/financial', createFinancialRoutes(container.get('financialController')));
     app.use('/api/v1/admin', createAdminRoutes(container.get('adminController')));
     app.use('/api/v1/status', createStatusRoutes(container.get('statusController')));
+
+    // New resource routes
+    app.use('/api/v1/users', createUserRoutes(container.get('userController')));
+    app.use('/api/v1/watchlists', createWatchlistRoutes(container.get('watchlistController')));
+    app.use('/api/v1/alerts', createAlertRoutes(container.get('alertController')));
+    app.use('/api/v1/assets', createAssetRoutes(container.get('assetController')));
 
     // Error handlers
     app.use(notFoundHandler);

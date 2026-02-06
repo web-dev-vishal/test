@@ -1,0 +1,125 @@
+/**
+ * Global-Fi Ultra - Asset Validation Schemas
+ * 
+ * Zod schemas for financial asset-related requests.
+ */
+
+import { z } from 'zod';
+
+/**
+ * Create asset schema
+ */
+export const createAssetSchema = z.object({
+    body: z.object({
+        symbol: z.string()
+            .min(1, 'Symbol is required')
+            .toUpperCase()
+            .trim(),
+        name: z.string()
+            .min(1, 'Asset name is required')
+            .trim(),
+        type: z.enum(['stock', 'crypto', 'forex', 'commodity', 'index'], {
+            errorMap: () => ({ message: 'Type must be stock, crypto, forex, commodity, or index' }),
+        }),
+        currentPrice: z.number()
+            .positive('Price must be positive')
+            .finite('Price must be a valid number')
+            .optional(),
+        currency: z.string()
+            .length(3, 'Currency must be a 3-letter code')
+            .toUpperCase()
+            .optional(),
+        metadata: z.object({
+            exchange: z.string().optional(),
+            sector: z.string().optional(),
+            industry: z.string().optional(),
+            marketCap: z.number().optional(),
+            description: z.string().optional(),
+            website: z.string().url().optional(),
+            logo: z.string().url().optional(),
+        }).optional(),
+    }),
+});
+
+/**
+ * Update asset schema
+ */
+export const updateAssetSchema = z.object({
+    params: z.object({
+        symbol: z.string().toUpperCase().trim(),
+    }),
+    body: z.object({
+        name: z.string()
+            .min(1, 'Asset name is required')
+            .trim()
+            .optional(),
+        type: z.enum(['stock', 'crypto', 'forex', 'commodity', 'index']).optional(),
+        currentPrice: z.number()
+            .positive('Price must be positive')
+            .finite('Price must be a valid number')
+            .optional(),
+        currency: z.string()
+            .length(3, 'Currency must be a 3-letter code')
+            .toUpperCase()
+            .optional(),
+        isActive: z.boolean().optional(),
+        metadata: z.object({
+            exchange: z.string().optional(),
+            sector: z.string().optional(),
+            industry: z.string().optional(),
+            marketCap: z.number().optional(),
+            description: z.string().optional(),
+            website: z.string().url().optional(),
+            logo: z.string().url().optional(),
+        }).optional(),
+    }),
+});
+
+/**
+ * Get asset schema
+ */
+export const getAssetSchema = z.object({
+    params: z.object({
+        symbol: z.string().toUpperCase().trim(),
+    }),
+});
+
+/**
+ * Delete asset schema
+ */
+export const deleteAssetSchema = getAssetSchema;
+
+/**
+ * Search/List assets schema
+ */
+export const searchAssetsSchema = z.object({
+    query: z.object({
+        type: z.enum(['stock', 'crypto', 'forex', 'commodity', 'index']).optional(),
+        search: z.string().optional(),
+        isActive: z.enum(['true', 'false']).transform(val => val === 'true').optional(),
+        page: z.string().regex(/^\d+$/).transform(Number).optional(),
+        limit: z.string().regex(/^\d+$/).transform(Number).optional(),
+        sort: z.string().optional(),
+    }),
+});
+
+/**
+ * Get live asset data schema
+ */
+export const getLiveAssetSchema = z.object({
+    params: z.object({
+        symbol: z.string().toUpperCase().trim(),
+    }),
+    query: z.object({
+        forceRefresh: z.enum(['true', 'false']).transform(val => val === 'true').optional(),
+    }),
+});
+
+export default {
+    createAssetSchema,
+    updateAssetSchema,
+    getAssetSchema,
+    deleteAssetSchema,
+    searchAssetsSchema,
+    getLiveAssetSchema,
+};

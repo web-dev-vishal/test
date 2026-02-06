@@ -63,6 +63,52 @@ npm run dev
 | `/api/v1/financial/live` | GET | Trigger orchestration, get live data |
 | `/api/v1/financial/cached` | GET | Get cached data only |
 
+### Users
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/users` | GET | List all users (paginated) |
+| `/api/v1/users/:id` | GET | Get user by ID |
+| `/api/v1/users` | POST | Create new user |
+| `/api/v1/users/:id` | PUT | Update user (full update) |
+| `/api/v1/users/:id` | PATCH | Partial update user |
+| `/api/v1/users/:id` | DELETE | Delete user (soft delete) |
+
+### Watchlists
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/watchlists` | GET | List watchlists (supports userId query) |
+| `/api/v1/watchlists/:id` | GET | Get watchlist by ID |
+| `/api/v1/watchlists` | POST | Create new watchlist |
+| `/api/v1/watchlists/:id` | PUT | Update watchlist |
+| `/api/v1/watchlists/:id` | DELETE | Delete watchlist |
+| `/api/v1/watchlists/:id/assets` | POST | Add asset to watchlist |
+| `/api/v1/watchlists/:id/assets/:symbol` | DELETE | Remove asset from watchlist |
+
+### Alerts
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/alerts` | GET | List alerts (supports userId, symbol queries) |
+| `/api/v1/alerts/:id` | GET | Get alert by ID |
+| `/api/v1/alerts` | POST | Create new alert |
+| `/api/v1/alerts/:id` | PUT | Update alert |
+| `/api/v1/alerts/:id` | DELETE | Delete alert |
+| `/api/v1/alerts/:id/activate` | PATCH | Activate alert |
+| `/api/v1/alerts/:id/deactivate` | PATCH | Deactivate alert |
+
+### Financial Assets
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/assets` | GET | Search/list assets (supports type, search queries) |
+| `/api/v1/assets/:symbol` | GET | Get asset by symbol |
+| `/api/v1/assets/:symbol/live` | GET | Get live data for asset |
+| `/api/v1/assets` | POST | Create/track new asset |
+| `/api/v1/assets/:symbol` | PUT | Update asset info |
+| `/api/v1/assets/:symbol` | DELETE | Remove asset tracking |
+
 ### Admin
 
 | Endpoint | Method | Description |
