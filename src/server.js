@@ -60,7 +60,7 @@ const createApp = () => {
  */
 const setupRoutes = (app, container) => {
     // Health routes (no /api prefix)
-    app.use('/', createHealthRoutes(container.get('healthController')));
+    app.use('/api/v1/health', createHealthRoutes(container.get('healthController')));
 
     // API routes
     app.use('/api/v1/financial', createFinancialRoutes(container.get('financialController')));
