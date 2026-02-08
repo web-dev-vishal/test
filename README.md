@@ -794,16 +794,6 @@ Services for API calls, RxJS observables for streams, NgRx for state management,
 **Next.js/Nuxt:**
 Server-side rendering for initial load, API routes for backend proxy, static generation for marketing pages, incremental static regeneration
 
-### UI Component Libraries
-
-Works great with:
-- Material-UI (React)
-- Ant Design (React)
-- Vuetify (Vue)
-- PrimeNG (Angular)
-- Tailwind CSS (any framework)
-- Bootstrap (classic but effective)
-
 ### Chart Libraries
 
 Recommended options:
