@@ -779,21 +779,6 @@ Each card displays:
 ---
 
 ## Integration Examples
-
-### Frontend Frameworks
-
-**React Integration:**
-Use hooks for WebSocket connection, state management with Redux or Context, real-time updates with useEffect, chart libraries like Recharts or TradingView
-
-**Vue Integration:**
-Composables for data fetching, Vuex for global state, reactive data binding, chart components with Vue-chartjs
-
-**Angular Integration:**
-Services for API calls, RxJS observables for streams, NgRx for state management, component-based architecture
-
-**Next.js/Nuxt:**
-Server-side rendering for initial load, API routes for backend proxy, static generation for marketing pages, incremental static regeneration
-
 ### Chart Libraries
 
 Recommended options:
