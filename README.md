@@ -789,9 +789,6 @@ Recommended options:
 - ApexCharts (beautiful out of box)
 
 ---
-
-## Authentication & Security UI
-
 ### Login/Signup Flow
 
 **Registration:**
