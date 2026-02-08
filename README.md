@@ -663,17 +663,6 @@ Each card displays:
 - Large interactive charts
 - Full feature set
 
-### Accessibility
-
-- Keyboard navigation support
-- ARIA labels on interactive elements
-- Focus indicators on all controls
-- Screen reader compatible
-- High contrast mode option
-- Reduced motion preferences respected
-
----
-
 ## User Experience Patterns
 
 ### Dashboard Interactions
