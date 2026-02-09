@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/server.js",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "vscode": "^1.22.0"
   },
   "scripts": {
     "start": "node src/server.js",
