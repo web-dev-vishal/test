@@ -717,50 +717,6 @@ npm run lint:fix   # Fix code style issues
 
 ---
 
-
-### Component Design
-
-**Price Cards:**
-- Asset symbol and name
-- Current price (large, prominent)
-- Change percentage (color-coded)
-- 24h high/low range
-- Volume indicator
-- Mini sparkline chart
-
-**Charts:**
-- Real-time updates
-- Multiple timeframes
-- Technical indicators
-- Fullscreen mode
-- Export functionality
-
-**Alerts:**
-- Slide-in notifications
-- Auto-dismiss after 5 seconds
-- Different colors by type
-- Sound toggle option
-
-### Responsive Design
-
-**Mobile (< 640px):**
-- Single column layout
-- Stacked price cards
-- Bottom navigation
-- Simplified charts
-
-**Tablet (640px - 1024px):**
-- Two-column grid
-- Sidebar overlay
-- Medium charts
-
-**Desktop (> 1024px):**
-- Multi-column dashboard
-- Persistent sidebar
-- Large interactive charts
-
----
-
 ## Security
 
 ### Best Practices
