@@ -8,7 +8,7 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 
-import { config, logger, connectDatabase, closeDatabaseConnection, connectRedis, closeRedisConnection, connectRabbitMQ, closeRabbitMQConnection, flushLogger } from './config/index.js';
+import { config, logger, connectDatabase, closeDatabaseConnection, connectRedis, closeRedisConnection, connectRabbitMQ, closeRabbitMQConnection, flushLogger, safeLog } from './config/index.js';
 import { getContainer } from './di/container.js';
 import {
     requestIdMiddleware,
@@ -102,12 +102,12 @@ const setupGracefulShutdown = (server, container) => {
 
         // Stop accepting new connections
         server.close(() => {
-            logger.info('HTTP server closed');
+            safeLog('info', 'HTTP server closed'); // ✅ Use safeLog
         });
 
         // Set timeout for force shutdown
         const forceShutdownTimer = setTimeout(() => {
-            logger.error('Forced shutdown after timeout');
+            console.error('Forced shutdown after timeout'); // ✅ Use console directly
             process.exit(1);
         }, 15000);
 
@@ -116,33 +116,33 @@ const setupGracefulShutdown = (server, container) => {
             const socketManager = container.getSocketManager();
             if (socketManager) {
                 await socketManager.close();
-                logger.info('Socket.io closed');
+                safeLog('info', 'Socket.io closed'); // ✅ Use safeLog
             }
 
             // Close AI job queue
             await container.closeAIJobQueue();
-            logger.info('AI job queue closed');
+            safeLog('info', 'AI job queue closed'); // ✅ Use safeLog
 
             // Close MongoDB
             await closeDatabaseConnection();
-            logger.info('MongoDB connection closed');
+            safeLog('info', 'MongoDB connection closed'); // ✅ Use safeLog
 
             // Close Redis
             await closeRedisConnection();
-            logger.info('Redis connection closed');
+            safeLog('info', 'Redis connection closed'); // ✅ Use safeLog
 
             // Close RabbitMQ
             await closeRabbitMQConnection();
-            logger.info('RabbitMQ connection closed');
+            safeLog('info', 'RabbitMQ connection closed'); // ✅ Use safeLog
 
             // Flush logs
             await flushLogger();
+            console.log('Graceful shutdown complete'); // ✅ Use console after logger is closed
 
             clearTimeout(forceShutdownTimer);
-            logger.info('Graceful shutdown complete');
             process.exit(0);
         } catch (error) {
-            logger.error('Error during shutdown', { error: error.message });
+            console.error('Error during shutdown', error.message); // ✅ Use console directly
             clearTimeout(forceShutdownTimer);
             process.exit(1);
         }
@@ -151,15 +151,24 @@ const setupGracefulShutdown = (server, container) => {
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
 
-    // Handle uncaught exceptions
+    // ✅ Handle uncaught exceptions - use console.error to avoid logger issues
     process.on('uncaughtException', (error) => {
-        logger.error('Uncaught exception', { error: error.message, stack: error.stack });
+        console.error('='.repeat(60));
+        console.error('❌ UNCAUGHT EXCEPTION');
+        console.error('='.repeat(60));
+        console.error('Error:', error.message);
+        console.error('Stack:', error.stack);
+        console.error('='.repeat(60));
         shutdown('uncaughtException');
     });
 
-    // Handle unhandled rejections
+    // ✅ Handle unhandled rejections - use console.error
     process.on('unhandledRejection', (reason, promise) => {
-        logger.error('Unhandled rejection', { reason: String(reason) });
+        console.error('='.repeat(60));
+        console.error('❌ UNHANDLED REJECTION');
+        console.error('='.repeat(60));
+        console.error('Reason:', String(reason));
+        console.error('='.repeat(60));
     });
 };
 
@@ -169,6 +178,16 @@ const setupGracefulShutdown = (server, container) => {
 const startServer = async () => {
     try {
         logger.info('Starting Global-Fi Ultra...');
+
+        // 🔍 DEBUG: Check environment variables at startup
+        console.log('='.repeat(60));
+        console.log('🔍 ENVIRONMENT VARIABLE DEBUG');
+        console.log('='.repeat(60));
+        console.log('NODE_ENV:', process.env.NODE_ENV);
+        console.log('GROQ_API_KEY from process.env:', process.env.GROQ_API_KEY ? `EXISTS (length: ${process.env.GROQ_API_KEY.length})` : 'MISSING/EMPTY');
+        console.log('GROQ_API_KEY value:', process.env.GROQ_API_KEY || 'EMPTY');
+        console.log('GROQ_API_KEY first 10 chars:', process.env.GROQ_API_KEY?.substring(0, 10) || 'N/A');
+        console.log('='.repeat(60));
 
         // Connect to databases and message queue
         await connectDatabase();
@@ -192,7 +211,7 @@ const startServer = async () => {
 
         // Initialize DI container
         const container = getContainer();
-        container.initialize({ io });
+        await container.initialize({ io });  // ✅ With await
 
         // Setup routes
         setupRoutes(app, container);

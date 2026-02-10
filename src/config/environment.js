@@ -5,6 +5,7 @@
  * All configuration is loaded from environment variables.
  */
 
+import 'dotenv/config';
 import { z } from 'zod';
 
 /**

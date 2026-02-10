@@ -86,6 +86,9 @@ export const logger = winston.createLogger({
     exitOnError: false,
 });
 
+// ✅ Track if logger has been closed
+let isLoggerClosed = false;
+
 /**
  * Create a child logger with request context
  * @param {string} requestId - Request ID for tracing
@@ -96,14 +99,50 @@ export const createRequestLogger = (requestId) => {
 };
 
 /**
+ * Safe logging wrapper - prevents writing after logger is closed
+ * @param {string} level - Log level (info, error, warn, debug)
+ * @param {string} message - Log message
+ * @param {Object} meta - Additional metadata
+ */
+export const safeLog = (level, message, meta = {}) => {
+    if (!isLoggerClosed) {
+        logger[level](message, meta);
+    } else {
+        // Fallback to console if logger is closed
+        console[level === 'error' ? 'error' : 'log'](`[${level.toUpperCase()}]`, message, meta);
+    }
+};
+
+/**
  * Flush logger and close transports
  * @returns {Promise<void>}
  */
 export const flushLogger = () => {
     return new Promise((resolve) => {
-        logger.on('finish', resolve);
+        if (isLoggerClosed) {
+            resolve();
+            return;
+        }
+        
+        isLoggerClosed = true; // ✅ Mark logger as closed
+        
+        logger.on('finish', () => {
+            resolve();
+        });
+        
+        // Set a timeout in case 'finish' event doesn't fire
+        setTimeout(() => {
+            resolve();
+        }, 5000);
+        
         logger.end();
     });
 };
+
+/**
+ * Check if logger is closed
+ * @returns {boolean}
+ */
+export const isLoggerActive = () => !isLoggerClosed;
 
 export default logger;
