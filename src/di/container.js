@@ -58,7 +58,7 @@ export class Container {
      * @param {Object} options
      * @param {import('socket.io').Server} options.io - Socket.io server
      */
-    initialize(options) {
+    async initialize(options) {  // ✅ ADDED 'async' keyword here
         const { io } = options;
 
         // Circuit breaker state change callback
@@ -122,7 +122,7 @@ export class Container {
                 });
 
                 // Validate API key
-                await groqClient.validateApiKey();
+                await groqClient.validateApiKey();  // ✅ This line (125) now works because the function is async
                 logger.info('✅ Groq API key validated');
 
                 // Initialize AI services
