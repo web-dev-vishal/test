@@ -717,23 +717,6 @@ npm run lint:fix   # Fix code style issues
 
 ---
 
-## UI/UX Guidelines
-
-### Color Scheme
-
-**Light Mode:**
-- Background: White (#FFFFFF) / Light gray (#F5F7FA)
-- Primary: Blue (#2563EB)
-- Success: Green (#10B981)
-- Danger: Red (#EF4444)
-- Text: Dark gray (#1F2937)
-
-**Dark Mode:**
-- Background: Deep navy (#0F172A) / Panels (#1E293B)
-- Primary: Bright blue (#3B82F6)
-- Success: Bright green (#22C55E)
-- Danger: Red (#F87171)
-- Text: Light gray (#E2E8F0)
 
 ### Component Design
 
