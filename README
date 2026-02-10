@@ -22,6 +22,27 @@ Managing multiple financial data APIs is tedious. Global-Fi Ultra solves this by
 
 ## Dashboard Features
 
+### AI-Powered Features ✨ NEW
+
+**Intelligent Market Analysis**
+- Real-time sentiment analysis of news and social media
+- AI-powered price predictions and trend analysis
+- Personalized investment recommendations based on risk profile
+- Portfolio health analysis with actionable insights
+- Natural language explanations of market movements
+
+**AI Chat Assistant**
+- Chat with AI about markets, stocks, and economics
+- Streaming responses for real-time interaction
+- Context-aware financial advice
+- Multi-asset comparison and analysis
+
+**Powered by Groq AI**
+- Ultra-fast inference (280-560 tokens/second)
+- Dual-model strategy (70B for complex, 8B for simple)
+- Generous free tier (300K tokens/min, no daily limits)
+- Redis caching for optimal performance
+
 ### Main Features
 
 **Live Market Dashboard**
@@ -82,6 +103,82 @@ Redis caching with different TTLs per API. Stock data cached for 60s, news for 5
 
 **Production Ready**
 Health checks, graceful shutdown, Docker setup, rate limiting. Battle-tested in production.
+
+**AI-Powered Analysis** ✨ NEW
+Groq AI integration for market sentiment analysis, news summarization, and intelligent insights. Ultra-fast inference with generous free tier.
+
+---
+
+## AI Features Quick Start
+
+### Get Started in 5 Minutes
+
+1. **Get Groq API Key** (free): https://console.groq.com/keys
+2. **Add to .env**: `GROQ_API_KEY=gsk_your_key_here`
+3. **Test it**: `npm run ai:demo`
+
+### Available AI Endpoints
+
+```bash
+# Sentiment analysis
+POST /api/v1/ai/sentiment
+Body: { "text": "Stock market rallies on strong earnings" }
+
+# Asset analysis
+POST /api/v1/ai/analyze
+Body: { "symbol": "AAPL", "priceData": {...} }
+
+# Investment recommendations
+POST /api/v1/ai/recommend
+Body: { "userProfile": {...}, "marketData": [...] }
+
+# Price predictions
+POST /api/v1/ai/predict
+Body: { "symbol": "AAPL", "historicalData": [...] }
+
+# News summarization
+POST /api/v1/ai/news/summary
+Body: { "newsArticles": [...] }
+```
+
+### WebSocket AI Chat
+
+```javascript
+const socket = io('http://localhost:3000');
+
+// Chat with streaming response
+socket.emit('ai:chat', {
+  message: 'Explain what causes inflation',
+  sessionId: '123'
+});
+
+socket.on('ai:stream:chunk', (data) => {
+  console.log(data.chunk); // Real-time tokens
+});
+```
+
+### Redis Monitoring Tool
+
+Professional CLI for monitoring cache:
+
+```bash
+npm run redis:monitor    # Interactive mode
+npm run redis:watch      # Auto-refresh mode
+npm run redis:stats      # Statistics
+```
+
+### Documentation
+
+- **Full Guide**: `docs/AI_FEATURES.md`
+- **Quick Start**: `docs/QUICK_START_AI.md`
+- **Integration**: `docs/INTEGRATION_GUIDE.md`
+- **Checklist**: `GET_STARTED_CHECKLIST.md`
+
+### Examples
+
+- **Demo Script**: `npm run ai:demo`
+- **Integration Server**: `npm run ai:integrate`
+- **WebSocket Chat**: Open `examples/websocket-client.html`
 
 ---
 

@@ -56,6 +56,11 @@ const envSchema = z.object({
   // RabbitMQ
   RABBITMQ_URL: z.string().default('amqp://localhost:5672'),
   RABBITMQ_QUEUE_PREFIX: z.string().default('globalfi'),
+
+  // Groq AI
+  GROQ_API_KEY: z.string().default(''),
+  GROQ_PRIMARY_MODEL: z.string().default('llama-3.3-70b-versatile'),
+  GROQ_FAST_MODEL: z.string().default('llama-3.1-8b-instant'),
 });
 
 /**
@@ -139,6 +144,12 @@ export const config = {
   rabbitmq: {
     url: env.RABBITMQ_URL,
     queuePrefix: env.RABBITMQ_QUEUE_PREFIX,
+  },
+
+  ai: {
+    groqApiKey: env.GROQ_API_KEY,
+    primaryModel: env.GROQ_PRIMARY_MODEL,
+    fastModel: env.GROQ_FAST_MODEL,
   },
 
   /** Cache TTLs per API source (in seconds) */
