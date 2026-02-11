@@ -8,6 +8,7 @@
  */
 
 import { logger } from '../../config/logger.js';
+import { sanitizeAIInput } from '../../utils/sanitizer.js';
 
 /**
  * AI Controller
@@ -44,6 +45,9 @@ export class AIController {
     try {
       const { text, type = 'general' } = req.body;
 
+      // Sanitize user input before passing to AI
+      const sanitizedText = sanitizeAIInput(text);
+
       if (!text) {
         return res.status(400).json({
           success: false,
@@ -57,7 +61,7 @@ export class AIController {
         textLength: text.length
       });
 
-      const result = await this.aiNewsService.analyzeSentiment(text);
+      const result = await this.aiNewsService.analyzeSentiment(sanitizedText);
 
       res.json({
         success: true,

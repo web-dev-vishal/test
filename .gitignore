@@ -143,7 +143,5 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node 
 
-# Custom addition to exclude package-lock.json
-package-lock.json
 /src/generated/prisma
 /generated/prisma

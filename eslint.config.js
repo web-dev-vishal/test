@@ -1,25 +1,35 @@
 /**
- * Global-Fi Ultra - ESLint Configuration
+ * Global-Fi Ultra - ESLint Configuration (Flat Config - ESLint 9+)
+ * 
+ * Uses the new flat config format with proper languageOptions and globals.
  */
 
-export default {
-    env: {
-        node: true,
-        es2022: true,
-        jest: true,
+import globals from 'globals';
+import js from '@eslint/js';
+
+export default [
+    js.configs.recommended,
+    {
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                ...globals.node,
+                ...globals.es2021,
+                ...globals.jest,
+            },
+        },
+        rules: {
+            'no-console': 'warn',
+            'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+            'prefer-const': 'error',
+            'no-var': 'error',
+            'eqeqeq': 'error',
+            semi: ['error', 'always'],
+            quotes: ['error', 'single', { avoidEscape: true }],
+        },
     },
-    parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+    {
+        ignores: ['node_modules/', 'dist/', 'coverage/', 'logs/'],
     },
-    extends: ['eslint:recommended'],
-    rules: {
-        'no-console': 'warn',
-        'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-        'prefer-const': 'error',
-        'no-var': 'error',
-        'eqeqeq': 'error',
-        semi: ['error', 'always'],
-        quotes: ['error', 'single', { avoidEscape: true }],
-    },
-};
+];

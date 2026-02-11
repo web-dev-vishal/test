@@ -1,0 +1,31 @@
+/**
+ * Standardized Error Response Utility
+ * 
+ * Provides a consistent error response format across all endpoints.
+ * Works alongside the existing AppError class from core/errors.
+ * 
+ * @module utils/errorResponse
+ */
+
+/**
+ * Send a standardized error response
+ * 
+ * @param {import('express').Response} res - Express response object
+ * @param {Error} error - Error to respond with
+ */
+export const errorResponse = (res, error) => {
+    const statusCode = error.httpStatus || error.statusCode || 500;
+    const response = {
+        success: false,
+        error: {
+            code: error.code || 'INTERNAL_ERROR',
+            message: error.isOperational ? error.message : 'An unexpected error occurred',
+            ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+        },
+        timestamp: new Date().toISOString(),
+    };
+
+    return res.status(statusCode).json(response);
+};
+
+export default errorResponse;

@@ -49,6 +49,35 @@ export const adminRateLimiter = rateLimit({
 });
 
 /**
+ * Stricter rate limiter for AI endpoints (10 requests per minute)
+ * AI calls are expensive (token consumption, Groq API quota), so limit separately.
+ */
+export const aiRateLimiter = rateLimit({
+    windowMs: 60 * 1000,       // 1 minute window
+    max: 10,                    // 10 AI requests per minute per IP
+    message: {
+        error: {
+            code: 'E1012',
+            message: 'AI rate limit exceeded. Maximum 10 AI requests per minute.',
+            retryAfter: 60,
+        },
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+        return req.user?.id || req.ip;
+    },
+    handler: (req, res, next, options) => {
+        logger.warn('AI rate limit exceeded', {
+            ip: req.ip,
+            path: req.path,
+            requestId: req.requestId,
+        });
+        res.status(429).json(options.message);
+    },
+});
+
+/**
  * Lenient rate limiter for health checks (1000 requests per minute)
  */
 export const healthRateLimiter = rateLimit({

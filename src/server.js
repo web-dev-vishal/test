@@ -17,6 +17,7 @@ import {
     notFoundHandler,
     securityHeaders,
     corsMiddleware,
+    requestLogger,
 } from './presentation/middleware/index.js';
 import {
     createHealthRoutes,
@@ -49,6 +50,15 @@ const createApp = () => {
 
     // Request ID for tracing
     app.use(requestIdMiddleware);
+
+    // Request logging
+    app.use(requestLogger);
+
+    // API versioning header
+    app.use((req, res, next) => {
+        res.setHeader('X-API-Version', '1.0.0');
+        next();
+    });
 
     // Global rate limiting
     app.use('/api', globalRateLimiter);
@@ -179,20 +189,31 @@ const startServer = async () => {
     try {
         logger.info('Starting Global-Fi Ultra...');
 
-        // 🔍 DEBUG: Check environment variables at startup
-        console.log('='.repeat(60));
-        console.log('🔍 ENVIRONMENT VARIABLE DEBUG');
-        console.log('='.repeat(60));
-        console.log('NODE_ENV:', process.env.NODE_ENV);
-        console.log('GROQ_API_KEY from process.env:', process.env.GROQ_API_KEY ? `EXISTS (length: ${process.env.GROQ_API_KEY.length})` : 'MISSING/EMPTY');
-        console.log('GROQ_API_KEY value:', process.env.GROQ_API_KEY || 'EMPTY');
-        console.log('GROQ_API_KEY first 10 chars:', process.env.GROQ_API_KEY?.substring(0, 10) || 'N/A');
-        console.log('='.repeat(60));
+        // Safe environment check - NEVER log actual key values
+        if (config.server.isDev) {
+            logger.debug('Environment check', {
+                nodeEnv: config.server.nodeEnv,
+                port: config.server.port,
+                groqKeyConfigured: !!config.ai.groqApiKey && config.ai.groqApiKey.length > 0,
+                groqKeyLength: config.ai.groqApiKey?.length || 0,
+                redisConfigured: !!config.redis.url,
+                mongoConfigured: !!config.database.uri,
+            });
+        }
 
-        // Connect to databases and message queue
+        // Connect to required services
         await connectDatabase();
         await connectRedis();
-        await connectRabbitMQ();
+
+        // Connect to optional services (don't crash if unavailable)
+        try {
+            await connectRabbitMQ();
+        } catch (error) {
+            logger.warn('RabbitMQ not available - running without message queue', {
+                error: error.message,
+                impact: 'AI job queue and async processing will be disabled'
+            });
+        }
 
         // Create Express app
         const app = createApp();
@@ -224,7 +245,7 @@ const startServer = async () => {
             logger.info(`🚀 Global-Fi Ultra running on http://${config.server.host}:${config.server.port}`);
             logger.info(`   Environment: ${config.server.nodeEnv}`);
             logger.info(`   Health check: http://${config.server.host}:${config.server.port}/health`);
-            
+
             // Log AI status
             if (container.isAIEnabled()) {
                 logger.info(`   ✅ AI Features: ENABLED`);
