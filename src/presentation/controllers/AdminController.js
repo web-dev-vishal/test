@@ -1,6 +1,5 @@
 /**
  * Global-Fi Ultra - Admin Controller
- * 
  * Admin endpoints for cache management and metrics.
  */
 
