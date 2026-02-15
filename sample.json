@@ -60,6 +60,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Users",
             "description": "User management CRUD endpoints",
@@ -162,6 +164,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Watchlists",
             "description": "Watchlist management with asset tracking",
@@ -294,6 +298,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Alerts",
             "description": "Price alert management with activate/deactivate",
@@ -423,6 +429,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Assets",
             "description": "Financial asset tracking and live data",
@@ -525,6 +533,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Financial Data",
             "description": "Live and cached financial data orchestration",
@@ -564,6 +574,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Admin",
             "description": "Administrative endpoints for cache management and metrics",
@@ -615,6 +627,8 @@
                 }
             ]
         },
+
+
         {
             "name": "Status",
             "description": "API provider status monitoring",
@@ -647,6 +661,8 @@
                 }
             ]
         },
+
+
         {
             "name": "AI",
             "description": "AI-powered financial analysis features. Requires GROQ_API_KEY to be configured.",
