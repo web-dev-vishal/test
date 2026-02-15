@@ -371,9 +371,6 @@
                 }
             ]
         },
- 
-
-
         {
             "name": "Assets",
             "description": "Financial asset tracking and live data",
@@ -475,11 +472,6 @@
                 }
             ]
         },
-
-
-
-
-        
         {
             "name": "Financial Data",
             "description": "Live and cached financial data orchestration",
@@ -524,38 +516,38 @@
             "description": "Administrative endpoints for cache management and audit logs",
             "item": [
                 {
-                    "name": "Get Cache Stats",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/admin/cache/stats",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["admin", "cache", "stats"]
-                        }
-                    }
-                },
-                {
                     "name": "Clear Cache",
                     "request": {
-                        "method": "DELETE",
+                        "method": "POST",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/admin/cache",
+                            "raw": "{{baseUrl}}/admin/cache/clear",
                             "host": ["{{baseUrl}}"],
-                            "path": ["admin", "cache"]
+                            "path": ["admin", "cache", "clear"]
                         }
                     }
                 },
                 {
-                    "name": "Get Audit Logs",
+                    "name": "Get Metrics",
                     "request": {
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/admin/audit?page=1&limit=20",
+                            "raw": "{{baseUrl}}/admin/metrics",
                             "host": ["{{baseUrl}}"],
-                            "path": ["admin", "audit"],
+                            "path": ["admin", "metrics"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/logs?page=1&limit=20",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["admin", "logs"],
                             "query": [
                                 {"key": "page", "value": "1"},
                                 {"key": "limit", "value": "20"}
@@ -565,6 +557,11 @@
                 }
             ]
         },
+
+
+
+        
+
         {
             "name": "Status",
             "description": "API provider status monitoring",
