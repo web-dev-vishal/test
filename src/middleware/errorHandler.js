@@ -6,7 +6,7 @@ import { logger } from '../config/logger.js';
 import { config } from '../config/environment.js';
 
 // Main error handler - must have 4 params for Express to recognize it
-export const errorHandler = (err, req, res, next) {
+export const errorHandler = (err, req, res, next) => {
     const requestId = req.requestId || 'unknown';
 
     // Log error with context
