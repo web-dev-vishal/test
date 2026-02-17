@@ -1,16 +1,9 @@
-/**
- * Global-Fi Ultra - Watchlist Model
- * 
- * User watchlists for tracking multiple financial assets.
- */
+// Watchlist model - user collections of financial assets to track
 
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-/**
- * Watchlist schema
- */
 const watchlistSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
@@ -66,14 +59,13 @@ const watchlistSchema = new Schema({
     collection: 'watchlists',
 });
 
-// Compound indexes for common queries
 watchlistSchema.index({ userId: 1, createdAt: -1 });
-watchlistSchema.index({ userId: 1, name: 1 }, { unique: true }); // Unique watchlist names per user
+watchlistSchema.index({ userId: 1, name: 1 }, { unique: true });
 watchlistSchema.index({ isPublic: 1, createdAt: -1 });
 
-// Method to add asset
+// Add asset to watchlist
 watchlistSchema.methods.addAsset = function (symbol, notes = '') {
-    // Check if asset already exists
+    // Check if already exists
     const exists = this.assets.some(asset => asset.symbol === symbol.toUpperCase());
 
     if (!exists) {
@@ -87,7 +79,7 @@ watchlistSchema.methods.addAsset = function (symbol, notes = '') {
     return this.save();
 };
 
-// Method to remove asset
+// Remove asset from watchlist
 watchlistSchema.methods.removeAsset = function (symbol) {
     this.assets = this.assets.filter(asset => asset.symbol !== symbol.toUpperCase());
     return this.save();
@@ -98,13 +90,10 @@ watchlistSchema.virtual('assetCount').get(function () {
     return this.assets.length;
 });
 
-// Ensure virtuals are included in JSON
+// Include virtuals in JSON
 watchlistSchema.set('toJSON', { virtuals: true });
 watchlistSchema.set('toObject', { virtuals: true });
 
-/**
- * Watchlist Model
- */
 export const Watchlist = mongoose.model('Watchlist', watchlistSchema);
 
 export default Watchlist;

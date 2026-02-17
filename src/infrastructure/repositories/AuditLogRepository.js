@@ -1,22 +1,10 @@
-/**
- * Global-Fi Ultra - Audit Log Repository
- * 
- * MongoDB repository for audit logs.
- */
+// Audit log repository for MongoDB operations
 
 import { AuditLog } from '../../models/AuditLog.js';
 import { logger } from '../../config/logger.js';
 import { DatabaseError } from '../../utils/errors.js';
 
-/**
- * Audit log repository
- */
 export class AuditLogRepository {
-    /**
-     * Create a new audit log entry
-     * @param {Object} data - Audit log data
-     * @returns {Promise<Object>}
-     */
     async create(data) {
         try {
             const auditLog = new AuditLog(data);
@@ -29,11 +17,6 @@ export class AuditLogRepository {
         }
     }
 
-    /**
-     * Find audit log by request ID
-     * @param {string} requestId
-     * @returns {Promise<Object|null>}
-     */
     async findByRequestId(requestId) {
         try {
             const auditLog = await AuditLog.findOne({ requestId }).lean();
@@ -44,13 +27,6 @@ export class AuditLogRepository {
         }
     }
 
-    /**
-     * Get recent audit logs
-     * @param {Object} [options]
-     * @param {number} [options.limit=50] - Number of logs to return
-     * @param {string} [options.status] - Filter by status
-     * @returns {Promise<Array>}
-     */
     async getRecent(options = {}) {
         const { limit = 50, status } = options;
 
@@ -67,11 +43,6 @@ export class AuditLogRepository {
         }
     }
 
-    /**
-     * Get error logs
-     * @param {number} [limit=20]
-     * @returns {Promise<Array>}
-     */
     async getErrors(limit = 20) {
         try {
             const logs = await AuditLog.find({
@@ -90,11 +61,6 @@ export class AuditLogRepository {
         }
     }
 
-    /**
-     * Get metrics summary
-     * @param {number} [hours=24] - Time window in hours
-     * @returns {Promise<Object>}
-     */
     async getMetrics(hours = 24) {
         const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 

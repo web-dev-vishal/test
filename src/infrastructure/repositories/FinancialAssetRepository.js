@@ -1,21 +1,9 @@
-/**
- * Global-Fi Ultra - Financial Asset Repository
- * 
- * Database operations for FinancialAsset model.
- */
+// Financial asset repository for database operations
 
 import { FinancialAsset } from '../../models/index.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Financial Asset Repository
- */
 export class FinancialAssetRepository {
-    /**
-     * Create a new asset
-     * @param {Object} assetData - Asset data
-     * @returns {Promise<Object>} Created asset
-     */
     async create(assetData) {
         try {
             const asset = new FinancialAsset(assetData);
@@ -28,11 +16,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Find asset by symbol
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object|null>} Asset or null
-     */
     async findBySymbol(symbol) {
         try {
             return await FinancialAsset.findOne({ symbol: symbol.toUpperCase() });
@@ -42,11 +25,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Find asset by ID
-     * @param {string} id - Asset ID
-     * @returns {Promise<Object|null>} Asset or null
-     */
     async findById(id) {
         try {
             return await FinancialAsset.findById(id);
@@ -56,16 +34,10 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Search/list assets with pagination
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Assets and pagination info
-     */
     async findAll({ page = 1, limit = 20, filter = {}, sort = '-createdAt', search = '' } = {}) {
         try {
             const skip = (page - 1) * limit;
 
-            // Add search functionality
             if (search) {
                 filter.$or = [
                     { symbol: { $regex: search, $options: 'i' } },
@@ -97,12 +69,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Update asset by symbol
-     * @param {string} symbol - Asset symbol
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object|null>} Updated asset or null
-     */
     async updateBySymbol(symbol, updateData) {
         try {
             const asset = await FinancialAsset.findOneAndUpdate(
@@ -122,13 +88,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Update asset price
-     * @param {string} symbol - Asset symbol
-     * @param {number} price - New price
-     * @param {string} source - Price source
-     * @returns {Promise<Object|null>} Updated asset or null
-     */
     async updatePrice(symbol, price, source = 'api') {
         try {
             const asset = await this.findBySymbol(symbol);
@@ -147,11 +106,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Bulk update prices
-     * @param {Array} updates - Array of {symbol, price, source}
-     * @returns {Promise<number>} Number of updated assets
-     */
     async bulkUpdatePrices(updates) {
         try {
             let updated = 0;
@@ -169,11 +123,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Delete asset by symbol (soft delete)
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object|null>} Deleted asset or null
-     */
     async deleteBySymbol(symbol) {
         try {
             const asset = await FinancialAsset.findOneAndUpdate(
@@ -193,12 +142,6 @@ export class FinancialAssetRepository {
         }
     }
 
-    /**
-     * Get assets by type
-     * @param {string} type - Asset type
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Assets
-     */
     async findByType(type, { limit = 100, isActive = true } = {}) {
         try {
             return await FinancialAsset.find({ type, isActive })

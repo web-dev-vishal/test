@@ -1,45 +1,24 @@
-/**
- * Global-Fi Ultra - Redis Cache Service
- * 
- * TTL-based caching with stale-while-revalidate support.
- */
+// Redis cache with TTL and stale-while-revalidate pattern
 
 import { getRedisClient } from '../../config/redis.js';
 import { config } from '../../config/environment.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Redis cache implementation
- */
 export class RedisCache {
     constructor() {
         this.keyPrefix = 'globalfi';
     }
 
-    /**
-     * Get Redis client
-     * @private
-     * @returns {import('ioredis').Redis}
-     */
     _getClient() {
         return getRedisClient();
     }
 
-    /**
-     * Build cache key
-     * @param {string} service - Service name
-     * @param {string} identifier - Unique identifier
-     * @returns {string}
-     */
+    // Build cache key with prefix
     buildKey(service, identifier) {
         return `${this.keyPrefix}:${service}:${identifier}`;
     }
 
-    /**
-     * Get cached value
-     * @param {string} key - Cache key
-     * @returns {Promise<Object|null>}
-     */
+    // Get cached value
     async get(key) {
         const client = this._getClient();
         if (!client) return null;
@@ -57,13 +36,7 @@ export class RedisCache {
         }
     }
 
-    /**
-     * Set cached value with TTL
-     * @param {string} key - Cache key
-     * @param {Object} value - Value to cache
-     * @param {number} [ttlSeconds] - TTL in seconds
-     * @returns {Promise<boolean>}
-     */
+    // Set value with TTL
     async set(key, value, ttlSeconds = config.redis.ttlDefault) {
         const client = this._getClient();
         if (!client) return false;
@@ -79,11 +52,7 @@ export class RedisCache {
         }
     }
 
-    /**
-     * Delete cached value
-     * @param {string} key - Cache key
-     * @returns {Promise<boolean>}
-     */
+    // Delete cached value
     async delete(key) {
         const client = this._getClient();
         if (!client) return false;
@@ -98,10 +67,7 @@ export class RedisCache {
         }
     }
 
-    /**
-     * Clear all cache entries
-     * @returns {Promise<boolean>}
-     */
+    // Clear all cache entries
     async clear() {
         const client = this._getClient();
         if (!client) return false;
@@ -119,13 +85,7 @@ export class RedisCache {
         }
     }
 
-    /**
-     * Get or set with callback (stale-while-revalidate pattern)
-     * @param {string} key - Cache key
-     * @param {Function} fetchFn - Function to fetch fresh data
-     * @param {number} [ttlSeconds] - TTL in seconds
-     * @returns {Promise<{data: Object, fromCache: boolean}>}
-     */
+    // Get or set with callback (stale-while-revalidate)
     async getOrSet(key, fetchFn, ttlSeconds) {
         // Try cache first
         const cached = await this.get(key);
@@ -144,11 +104,7 @@ export class RedisCache {
         }
     }
 
-    /**
-     * Get TTL for a service
-     * @param {string} service - Service name
-     * @returns {number}
-     */
+    // Get TTL for a service
     getTTL(service) {
         const ttlMap = {
             alpha_vantage: config.cacheTTL.alphaVantage,

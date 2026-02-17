@@ -1,37 +1,10 @@
-/**
- * AI Job Queue using RabbitMQ
- * 
- * Handles asynchronous AI analysis jobs using message queues.
- * Useful for batch processing and background tasks.
- * 
- * @module infrastructure/messaging/AIJobQueue
- */
+// AI job queue using RabbitMQ for async AI analysis tasks
 
 import amqplib from 'amqplib';
 import { logger } from '../../config/logger.js';
 import { config } from '../../config/environment.js';
 
-/**
- * AI Job Queue
- * 
- * @class
- * @example
- * const queue = new AIJobQueue({
- *   aiNewsService,
- *   aiMarketService
- * });
- * 
- * await queue.connect();
- * await queue.publishJob('analyze_sentiment', { text: '...' });
- */
 export class AIJobQueue {
-  /**
-   * Initialize queue with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {AINewsService} dependencies.aiNewsService - News service
-   * @param {AIMarketService} dependencies.aiMarketService - Market service
-   */
   constructor({ aiNewsService, aiMarketService }) {
     this.aiNewsService = aiNewsService;
     this.aiMarketService = aiMarketService;
@@ -50,13 +23,10 @@ export class AIJobQueue {
     };
   }
 
-  /**
-   * Connect to RabbitMQ
-   */
   async connect() {
     try {
       this.logger.info('Connecting to RabbitMQ...', {
-        url: config.rabbitmq.url.replace(/:[^:@]+@/, ':****@') // Hide password
+        url: config.rabbitmq.url.replace(/:[^:@]+@/, ':****@')
       });
 
       this.connection = await amqplib.connect(config.rabbitmq.url);
@@ -67,20 +37,18 @@ export class AIJobQueue {
         await this.channel.assertQueue(queueName, {
           durable: true,
           arguments: {
-            'x-message-ttl': 3600000, // 1 hour TTL
-            'x-max-length': 10000      // Max 10k messages
+            'x-message-ttl': 3600000,
+            'x-max-length': 10000
           }
         });
 
         this.logger.info(`Queue asserted: ${queueName}`);
       }
 
-      // Set prefetch to process one message at a time
       await this.channel.prefetch(1);
 
       this.isConnected = true;
 
-      // Handle connection events
       this.connection.on('error', (error) => {
         this.logger.error('RabbitMQ connection error', { error: error.message });
         this.isConnected = false;
@@ -100,14 +68,6 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Publish job to queue
-   * 
-   * @param {string} jobType - Type of job (sentiment, analysis, recommendation, batch)
-   * @param {Object} data - Job data
-   * @param {Object} options - Publishing options
-   * @returns {Promise<boolean>} Success status
-   */
   async publishJob(jobType, data, options = {}) {
     if (!this.isConnected) {
       throw new Error('Not connected to RabbitMQ');
@@ -154,36 +114,29 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Start consuming jobs from queues
-   */
   async startConsumers() {
     if (!this.isConnected) {
       throw new Error('Not connected to RabbitMQ');
     }
 
-    // Sentiment analysis consumer
     await this.channel.consume(
       this.queues.sentiment,
       (msg) => this._handleSentimentJob(msg),
       { noAck: false }
     );
 
-    // Market analysis consumer
     await this.channel.consume(
       this.queues.analysis,
       (msg) => this._handleAnalysisJob(msg),
       { noAck: false }
     );
 
-    // Recommendation consumer
     await this.channel.consume(
       this.queues.recommendation,
       (msg) => this._handleRecommendationJob(msg),
       { noAck: false }
     );
 
-    // Batch processing consumer
     await this.channel.consume(
       this.queues.batch,
       (msg) => this._handleBatchJob(msg),
@@ -193,12 +146,6 @@ export class AIJobQueue {
     this.logger.info('AI job consumers started');
   }
 
-  /**
-   * Handle sentiment analysis job
-   * 
-   * @private
-   * @param {Object} msg - RabbitMQ message
-   */
   async _handleSentimentJob(msg) {
     if (!msg) return;
 
@@ -215,11 +162,9 @@ export class AIJobQueue {
       if (type === 'news') {
         result = await this.aiNewsService.analyzeSentiment(text);
       } else {
-        // Generic sentiment
         result = { sentiment: 'neutral', confidence: 0 };
       }
 
-      // Acknowledge message
       this.channel.ack(msg);
 
       this.logger.info('Sentiment job complete', {
@@ -227,7 +172,6 @@ export class AIJobQueue {
         sentiment: result.sentiment
       });
 
-      // Publish result to results queue if needed
       await this._publishResult(job.id, result);
     } catch (error) {
       this.logger.error('Sentiment job failed', {
@@ -235,17 +179,10 @@ export class AIJobQueue {
         error: error.message
       });
 
-      // Reject and requeue if not too many attempts
       this.channel.nack(msg, false, job.attempts < 3);
     }
   }
 
-  /**
-   * Handle market analysis job
-   * 
-   * @private
-   * @param {Object} msg - RabbitMQ message
-   */
   async _handleAnalysisJob(msg) {
     if (!msg) return;
 
@@ -280,12 +217,6 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Handle recommendation job
-   * 
-   * @private
-   * @param {Object} msg - RabbitMQ message
-   */
   async _handleRecommendationJob(msg) {
     if (!msg) return;
 
@@ -321,12 +252,6 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Handle batch processing job
-   * 
-   * @private
-   * @param {Object} msg - RabbitMQ message
-   */
   async _handleBatchJob(msg) {
     if (!msg) return;
 
@@ -376,13 +301,6 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Publish job result
-   * 
-   * @private
-   * @param {string} jobId - Job ID
-   * @param {Object} result - Job result
-   */
   async _publishResult(jobId, result) {
     const resultsQueue = `${config.rabbitmq.queuePrefix}_ai_results`;
 
@@ -408,21 +326,10 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Generate unique job ID
-   * 
-   * @private
-   * @returns {string} Job ID
-   */
   _generateJobId() {
     return `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  /**
-   * Get queue statistics
-   * 
-   * @returns {Promise<Object>} Queue stats
-   */
   async getQueueStats() {
     if (!this.isConnected) {
       return null;
@@ -445,12 +352,6 @@ export class AIJobQueue {
     return stats;
   }
 
-  /**
-   * Purge queue
-   * 
-   * @param {string} jobType - Queue type to purge
-   * @returns {Promise<number>} Number of messages purged
-   */
   async purgeQueue(jobType) {
     if (!this.isConnected) {
       throw new Error('Not connected to RabbitMQ');
@@ -479,9 +380,6 @@ export class AIJobQueue {
     }
   }
 
-  /**
-   * Close connection
-   */
   async close() {
     try {
       if (this.channel) {

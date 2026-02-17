@@ -1,34 +1,9 @@
-/**
- * AI Market Analysis Service
- * 
- * Provides AI-powered market analysis including price predictions,
- * trend analysis, and investment recommendations.
- * 
- * @module application/services/AIMarketService
- */
+// AI market analysis - price predictions, trends, investment recommendations
+// Uses Groq AI for analysis with caching
 
 import { logger } from '../config/logger.js';
 
-/**
- * AI Market Service
- * 
- * @class
- * @example
- * const service = new AIMarketService({
- *   groqClient,
- *   cacheService
- * });
- * 
- * const analysis = await service.analyzeAsset('AAPL', priceData);
- */
 export class AIMarketService {
-  /**
-   * Initialize service with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {GroqClient} dependencies.groqClient - AI client
-   * @param {RedisCache} dependencies.cacheService - Cache service
-   */
   constructor({ groqClient, cacheService }) {
     if (!groqClient) {
       throw new Error('GroqClient is required');
@@ -39,13 +14,7 @@ export class AIMarketService {
     this.logger = logger;
   }
 
-  /**
-   * Analyze asset with AI
-   * 
-   * @param {string} symbol - Asset symbol
-   * @param {Object} priceData - Historical price data
-   * @returns {Promise<Object>} Analysis result
-   */
+  // Analyze asset - trend, support/resistance, outlook, risk
   async analyzeAsset(symbol, priceData) {
     const prompt = `Analyze this financial asset:
 
@@ -117,12 +86,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Compare multiple assets
-   * 
-   * @param {Array<Object>} assets - Array of assets with data
-   * @returns {Promise<Object>} Comparison result
-   */
+  // Compare multiple assets and recommend best investment
   async compareAssets(assets) {
     if (!assets || assets.length < 2) {
       return {
@@ -190,13 +154,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Generate investment recommendation
-   * 
-   * @param {Object} userProfile - User investment profile
-   * @param {Array<Object>} marketData - Current market data
-   * @returns {Promise<Object>} Recommendation
-   */
+  // Generate personalized investment recommendations based on user profile
   async generateRecommendation(userProfile, marketData) {
     const prompt = `Generate investment recommendation based on:
 
@@ -259,13 +217,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Analyze portfolio performance
-   * 
-   * @param {Array<Object>} holdings - User's current holdings
-   * @param {Object} marketConditions - Current market conditions
-   * @returns {Promise<Object>} Portfolio analysis
-   */
+  // Analyze portfolio - health, diversification, risk, suggested adjustments
   async analyzePortfolio(holdings, marketConditions) {
     const prompt = `Analyze this investment portfolio:
 
@@ -328,14 +280,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Predict price movement
-   * 
-   * @param {string} symbol - Asset symbol
-   * @param {Array<Object>} historicalData - Historical price data
-   * @param {number} daysAhead - Days to predict
-   * @returns {Promise<Object>} Prediction
-   */
+  // Predict price movement for next X days (educational only, not financial advice)
   async predictPrice(symbol, historicalData, daysAhead = 7) {
     const prompt = `Predict price movement for ${symbol}:
 
@@ -401,14 +346,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Explain market movement
-   * 
-   * @param {string} symbol - Asset symbol
-   * @param {number} changePercent - Price change percentage
-   * @param {Array<Object>} recentNews - Recent news articles
-   * @returns {Promise<string>} Explanation
-   */
+  // Explain why a stock/crypto moved up or down
   async explainMovement(symbol, changePercent, recentNews = []) {
     const newsContext = recentNews.length > 0
       ? `Recent news:\n${recentNews.slice(0, 5).map(n => `- ${n.title}`).join('\n')}`

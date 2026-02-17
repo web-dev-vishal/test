@@ -1,22 +1,10 @@
-/**
- * Global-Fi Ultra - ExchangeRate Client
- * 
- * Currency exchange rates from ExchangeRate-API.
- * Free tier: 1500 requests/month.
- */
+// ExchangeRate-API client for forex data (free tier: 1500 requests/month)
 
 import { BaseApiClient } from './BaseApiClient.js';
 import { ValidationError } from '../../utils/errors.js';
 import { Money } from '../../utils/valueObjects.js';
 
-/**
- * ExchangeRate-API client for forex data
- */
 export class ExchangeRateClient extends BaseApiClient {
-    /**
-     * @param {Object} [options]
-     * @param {Function} [options.onCircuitStateChange]
-     */
     constructor(options = {}) {
         super('exchangerate_api', {
             baseURL: 'https://api.exchangerate-api.com/v4',
@@ -25,24 +13,12 @@ export class ExchangeRateClient extends BaseApiClient {
         });
     }
 
-    /**
-     * Get latest exchange rates for a base currency
-     * @param {string} [base='USD'] - Base currency code
-     * @returns {Promise<Object>} Normalized exchange rates
-     */
     async getLatestRates(base = 'USD') {
         const response = await this.get(`/latest/${base.toUpperCase()}`);
 
         return this._normalizeResponse(response, base);
     }
 
-    /**
-     * Normalize ExchangeRate-API response to Global-Fi schema
-     * @private
-     * @param {Object} response
-     * @param {string} base
-     * @returns {Object}
-     */
     _normalizeResponse(response, base) {
         if (!response || !response.rates) {
             throw new ValidationError(
@@ -51,7 +27,6 @@ export class ExchangeRateClient extends BaseApiClient {
             );
         }
 
-        // Use Big.js for precision on key rates
         const keyRates = ['EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'INR'];
         const normalizedRates = {};
 

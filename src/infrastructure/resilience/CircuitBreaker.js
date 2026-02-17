@@ -1,35 +1,17 @@
-/**
- * Global-Fi Ultra - Circuit Breaker Implementation
- * 
- * Full state machine implementation (CLOSED → OPEN → HALF_OPEN → CLOSED).
- * Supports Redis-backed state persistence for multi-instance deployments.
- */
+// Circuit breaker - CLOSED → OPEN → HALF_OPEN state machine
+// Prevents cascading failures from external API issues
 
 import { logger } from '../../config/logger.js';
 import { config } from '../../config/environment.js';
 import { CircuitBreakerError } from '../../utils/errors.js';
 
-/**
- * Circuit Breaker States
- */
 export const CircuitState = {
     CLOSED: 'CLOSED',
     OPEN: 'OPEN',
     HALF_OPEN: 'HALF_OPEN',
 };
 
-/**
- * Circuit Breaker implementation with full state machine
- */
 export class CircuitBreaker {
-    /**
-     * @param {string} name - Service name for this circuit breaker
-     * @param {Object} [options] - Configuration options
-     * @param {number} [options.failureThreshold] - Number of failures before opening
-     * @param {number} [options.resetTimeout] - Time in ms before attempting half-open
-     * @param {number} [options.successThreshold] - Successes needed to close from half-open
-     * @param {Function} [options.onStateChange] - Callback when state changes
-     */
     constructor(name, options = {}) {
         this.name = name;
         this.failureThreshold = options.failureThreshold || config.circuitBreaker.threshold;
@@ -45,18 +27,12 @@ export class CircuitBreaker {
         this.nextAttemptTime = null;
     }
 
-    /**
-     * Execute a function through the circuit breaker
-     * @template T
-     * @param {Function} fn - Async function to execute
-     * @returns {Promise<T>}
-     */
+    // Execute function through circuit breaker
     async execute(fn) {
         if (this.state === CircuitState.OPEN) {
             if (Date.now() < this.nextAttemptTime) {
                 throw new CircuitBreakerError(this.name, `Circuit is OPEN until ${new Date(this.nextAttemptTime).toISOString()}`);
             }
-            // Transition to half-open
             this._setState(CircuitState.HALF_OPEN);
         }
 
@@ -70,10 +46,7 @@ export class CircuitBreaker {
         }
     }
 
-    /**
-     * Handle successful execution
-     * @private
-     */
+    // Handle successful execution
     _onSuccess() {
         if (this.state === CircuitState.HALF_OPEN) {
             this.successCount++;
@@ -86,16 +59,12 @@ export class CircuitBreaker {
         }
     }
 
-    /**
-     * Handle failed execution
-     * @private
-     */
+    // Handle failed execution
     _onFailure() {
         this.failureCount++;
         this.lastFailureTime = Date.now();
 
         if (this.state === CircuitState.HALF_OPEN) {
-            // Immediately go back to open
             this._setState(CircuitState.OPEN);
         } else if (this.failureCount >= this.failureThreshold) {
             this._setState(CircuitState.OPEN);
@@ -108,11 +77,7 @@ export class CircuitBreaker {
         });
     }
 
-    /**
-     * Set circuit breaker state
-     * @private
-     * @param {string} newState
-     */
+    // Set circuit breaker state
     _setState(newState) {
         const oldState = this.state;
         this.state = newState;
@@ -144,10 +109,7 @@ export class CircuitBreaker {
         }
     }
 
-    /**
-     * Get current circuit breaker status
-     * @returns {Object}
-     */
+    // Get current status
     getStatus() {
         return {
             name: this.name,
@@ -161,18 +123,13 @@ export class CircuitBreaker {
         };
     }
 
-    /**
-     * Manually reset the circuit breaker to closed state
-     */
+    // Manually reset to closed state
     reset() {
         this._setState(CircuitState.CLOSED);
         logger.info(`Circuit breaker ${this.name}: manually reset`);
     }
 
-    /**
-     * Check if circuit is allowing requests
-     * @returns {boolean}
-     */
+    // Check if allowing requests
     isAllowingRequests() {
         if (this.state === CircuitState.CLOSED) return true;
         if (this.state === CircuitState.HALF_OPEN) return true;

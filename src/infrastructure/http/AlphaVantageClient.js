@@ -1,23 +1,11 @@
-/**
- * Global-Fi Ultra - Alpha Vantage Client
- * 
- * Stock quotes from Alpha Vantage API.
- * Free tier: 5 requests/minute.
- */
+// Alpha Vantage client for stock quotes (free tier: 5 requests/minute)
 
 import { BaseApiClient } from './BaseApiClient.js';
 import { config } from '../../config/environment.js';
 import { ValidationError } from '../../utils/errors.js';
 import { Money, Percentage } from '../../utils/valueObjects.js';
 
-/**
- * Alpha Vantage API client for stock data
- */
 export class AlphaVantageClient extends BaseApiClient {
-    /**
-     * @param {Object} [options]
-     * @param {Function} [options.onCircuitStateChange]
-     */
     constructor(options = {}) {
         super('alpha_vantage', {
             baseURL: 'https://www.alphavantage.co',
@@ -28,11 +16,6 @@ export class AlphaVantageClient extends BaseApiClient {
         this.apiKey = config.apiKeys.alphaVantage;
     }
 
-    /**
-     * Get global quote for a stock symbol
-     * @param {string} [symbol='IBM'] - Stock symbol
-     * @returns {Promise<Object>} Normalized stock quote
-     */
     async getGlobalQuote(symbol = 'IBM') {
         const response = await this.get('/query', {
             function: 'GLOBAL_QUOTE',
@@ -43,13 +26,6 @@ export class AlphaVantageClient extends BaseApiClient {
         return this._normalizeQuote(response, symbol);
     }
 
-    /**
-     * Normalize Alpha Vantage response to Global-Fi schema
-     * @private
-     * @param {Object} response
-     * @param {string} symbol
-     * @returns {Object}
-     */
     _normalizeQuote(response, symbol) {
         const quote = response['Global Quote'];
 
@@ -68,7 +44,6 @@ export class AlphaVantageClient extends BaseApiClient {
             );
         }
 
-        // Use Big.js for precision
         const price = new Money(quote['05. price'] || '0');
         const change = new Money(quote['09. change'] || '0');
         const changePercent = quote['10. change percent']?.replace('%', '') || '0';

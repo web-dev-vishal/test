@@ -1,29 +1,10 @@
-/**
- * AI Controller
- * 
- * HTTP endpoints for AI-powered features including sentiment analysis,
- * market insights, and investment recommendations.
- * 
- * @module presentation/controllers/AIController
- */
+// AI-powered features - sentiment analysis, market insights, recommendations
+// All responses include disclaimers since this is NOT financial advice
 
 import { logger } from '../config/logger.js';
 import { sanitizeAIInput } from '../utils/sanitizer.js';
 
-/**
- * AI Controller
- * 
- * @class
- */
 export class AIController {
-  /**
-   * Initialize controller with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {AINewsService} dependencies.aiNewsService - News service
-   * @param {AIMarketService} dependencies.aiMarketService - Market service
-   * @param {AIJobQueue} dependencies.aiJobQueue - Job queue (optional)
-   */
   constructor({ aiNewsService, aiMarketService, aiJobQueue }) {
     if (!aiNewsService || !aiMarketService) {
       throw new Error('AI services are required');
@@ -35,12 +16,7 @@ export class AIController {
     this.logger = logger;
   }
 
-  /**
-   * Analyze sentiment of text
-   * 
-   * POST /api/v1/ai/sentiment
-   * Body: { text: string, type?: 'news' | 'general' }
-   */
+  // Analyze sentiment of text - works for news articles or general text
   analyzeSentiment = async (req, res) => {
     try {
       const { text, type = 'general' } = req.body;
@@ -80,12 +56,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Analyze asset with AI
-   * 
-   * POST /api/v1/ai/analyze
-   * Body: { symbol: string, priceData: object }
-   */
+  // AI analysis of a single asset based on price data
   analyzeAsset = async (req, res) => {
     try {
       const { symbol, priceData } = req.body;
@@ -121,12 +92,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Compare multiple assets
-   * 
-   * POST /api/v1/ai/compare
-   * Body: { assets: array }
-   */
+  // Compare multiple assets side-by-side (need at least 2)
   compareAssets = async (req, res) => {
     try {
       const { assets } = req.body;
@@ -162,12 +128,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Generate investment recommendation
-   * 
-   * POST /api/v1/ai/recommend
-   * Body: { userProfile: object, marketData: array }
-   */
+  // Generate investment recommendations based on user profile and market data
   generateRecommendation = async (req, res) => {
     try {
       const { userProfile, marketData } = req.body;
@@ -207,12 +168,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Analyze portfolio
-   * 
-   * POST /api/v1/ai/portfolio
-   * Body: { holdings: array, marketConditions: object }
-   */
+  // Analyze entire portfolio - diversification, risk, suggestions
   analyzePortfolio = async (req, res) => {
     try {
       const { holdings, marketConditions } = req.body;
@@ -251,12 +207,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Predict price movement
-   * 
-   * POST /api/v1/ai/predict
-   * Body: { symbol: string, historicalData: array, daysAhead?: number }
-   */
+  // Predict future price movement (default 7 days ahead)
   predictPrice = async (req, res) => {
     try {
       const { symbol, historicalData, daysAhead = 7 } = req.body;
@@ -298,12 +249,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Explain market movement
-   * 
-   * POST /api/v1/ai/explain
-   * Body: { symbol: string, changePercent: number, recentNews?: array }
-   */
+  // Explain why a stock/crypto moved up or down
   explainMovement = async (req, res) => {
     try {
       const { symbol, changePercent, recentNews = [] } = req.body;
@@ -344,12 +290,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Analyze market impact of news
-   * 
-   * POST /api/v1/ai/news/impact
-   * Body: { newsArticles: array }
-   */
+  // Analyze how news articles might impact the market
   analyzeNewsImpact = async (req, res) => {
     try {
       const { newsArticles } = req.body;
@@ -385,12 +326,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Generate news summary
-   * 
-   * POST /api/v1/ai/news/summary
-   * Body: { newsArticles: array, maxLength?: number }
-   */
+  // Summarize multiple news articles into a short digest
   generateNewsSummary = async (req, res) => {
     try {
       const { newsArticles, maxLength = 100 } = req.body;
@@ -429,12 +365,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Submit async job to queue
-   * 
-   * POST /api/v1/ai/jobs
-   * Body: { jobType: string, data: object, priority?: number }
-   */
+  // Submit async AI job to queue (for long-running tasks)
   submitJob = async (req, res) => {
     try {
       if (!this.aiJobQueue) {
@@ -484,11 +415,7 @@ export class AIController {
     }
   };
 
-  /**
-   * Get queue statistics
-   * 
-   * GET /api/v1/ai/jobs/stats
-   */
+  // Get job queue stats - pending, processing, completed
   getQueueStats = async (req, res) => {
     try {
       if (!this.aiJobQueue) {

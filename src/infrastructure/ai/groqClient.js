@@ -1,24 +1,10 @@
-/**
- * Groq AI Client Wrapper
- * 
- * High-performance AI client for Global-Fi Ultra using Groq's inference platform.
- * Handles model selection, retries, caching, streaming, and error recovery.
- * 
- * Features:
- * - Automatic model selection based on task complexity
- * - Exponential backoff retry logic
- * - Response caching to save API quota
- * - Token streaming for real-time chat
- * - Comprehensive error handling
- * 
- * @module infrastructure/ai/groqClient
- */
+// Groq AI client - handles model selection, retries, caching, and streaming
 
 import Groq from 'groq-sdk';
 import crypto from 'crypto';
 import { AI_CONFIG } from './aiConfig.js';
 
-// Custom error classes
+// Custom error classes for AI operations
 export class AIServiceError extends Error {
   constructor(message, originalError = null) {
     super(message);
@@ -50,31 +36,8 @@ export class AITimeoutError extends AIServiceError {
   }
 }
 
-/**
- * Groq AI Client
- * 
- * @class
- * @example
- * const client = new GroqClient({
- *   apiKey: process.env.GROQ_API_KEY,
- *   cacheService: redisCache,
- *   logger: winston
- * });
- * 
- * const response = await client.generateContent(prompt, { complex: true });
- */
 export class GroqClient {
-  /**
-   * Initialize Groq client with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {string} dependencies.apiKey - Groq API key
-   * @param {Object} dependencies.cacheService - Redis cache service
-   * @param {Object} dependencies.logger - Logger instance
-   * @throws {Error} If API key is missing
-   */
   constructor({ apiKey, cacheService, logger }) {
-    // Validate API key
     if (!apiKey) {
       throw new Error('Groq API key is required');
     }
@@ -83,7 +46,6 @@ export class GroqClient {
     this.cacheService = cacheService;
     this.logger = logger || console;
 
-    // Initialize Groq SDK
     this.client = new Groq({
       apiKey: this.apiKey
     });
@@ -95,27 +57,14 @@ export class GroqClient {
     });
   }
 
-  /**
-   * Select appropriate model based on task complexity
-   * 
-   * @private
-   * @param {boolean} complex - Whether task is complex
-   * @returns {string} Model identifier
-   */
+  // Pick the right model based on task complexity
   _selectModel(complex = false) {
     return complex 
       ? this.config.models.primary   // Llama 3.3 70B for complex tasks
       : this.config.models.fast;     // Llama 3.1 8B for simple tasks
   }
 
-  /**
-   * Generate cache key from prompt
-   * 
-   * @private
-   * @param {string} prompt - Input prompt
-   * @param {Object} options - Generation options
-   * @returns {string} Cache key
-   */
+  // Generate cache key from prompt
   _generateCacheKey(prompt, options = {}) {
     const hash = crypto
       .createHash('md5')
@@ -124,30 +73,15 @@ export class GroqClient {
     return `ai:response:${hash}`;
   }
 
-  /**
-   * Sleep utility for retry backoff
-   * 
-   * @private
-   * @param {number} ms - Milliseconds to sleep
-   * @returns {Promise<void>}
-   */
   _sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  /**
-   * Execute request with retry logic
-   * 
-   * @private
-   * @param {Function} requestFn - Async function to execute
-   * @param {number} attempt - Current attempt number
-   * @returns {Promise<any>} Response
-   */
+  // Execute request with retry logic
   async _withRetry(requestFn, attempt = 1) {
     try {
       return await requestFn();
     } catch (error) {
-      // Check if we should retry
       const shouldRetry = 
         attempt < this.config.retries.maxAttempts &&
         (error.status === 429 || error.status >= 500);
@@ -156,7 +90,6 @@ export class GroqClient {
         throw error;
       }
 
-      // Calculate backoff
       const backoff = Math.min(
         this.config.retries.initialBackoffMs * 
         Math.pow(this.config.retries.backoffMultiplier, attempt - 1),
@@ -174,15 +107,8 @@ export class GroqClient {
     }
   }
 
-  /**
-   * Validate API key
-   * 
-   * @returns {Promise<boolean>} True if key is valid
-   * @throws {AIAuthError} If key is invalid
-   */
   async validateApiKey() {
     try {
-      // Simple test request
       await this.client.chat.completions.create({
         model: this.config.models.fast,
         messages: [{ role: 'user', content: 'test' }],
@@ -197,18 +123,6 @@ export class GroqClient {
     }
   }
 
-  /**
-   * Generate content using appropriate model
-   * 
-   * @param {string} prompt - Input prompt
-   * @param {Object} options - Generation options
-   * @param {boolean} options.complex - Use 70B model for complex tasks
-   * @param {number} options.maxTokens - Max response tokens
-   * @param {number} options.temperature - Randomness (0-2)
-   * @param {boolean} options.cache - Enable caching
-   * @returns {Promise<string>} Generated text
-   * @throws {AIServiceError} If generation fails
-   */
   async generateContent(prompt, options = {}) {
     const {
       complex = false,
@@ -228,7 +142,6 @@ export class GroqClient {
       }
     }
 
-    // Select model
     const model = this._selectModel(complex);
 
     this.logger.info('Generating AI content', {
@@ -238,7 +151,6 @@ export class GroqClient {
     });
 
     try {
-      // Execute with retry logic
       const response = await this._withRetry(async () => {
         return await this.client.chat.completions.create({
           model,
@@ -276,7 +188,6 @@ export class GroqClient {
         prompt: prompt.substring(0, 100)
       });
 
-      // Handle specific errors
       if (error.status === 429) {
         throw new AIRateLimitError();
       }
@@ -288,18 +199,9 @@ export class GroqClient {
     }
   }
 
-  /**
-   * Stream content token-by-token
-   * 
-   * @param {string} prompt - Input prompt
-   * @param {Function} onChunk - Callback for each token chunk
-   * @param {Object} options - Generation options
-   * @returns {Promise<string>} Complete response
-   * @throws {AIServiceError} If streaming fails
-   */
   async streamContent(prompt, onChunk, options = {}) {
     const {
-      complex = true, // Usually use 70B for interactive chat
+      complex = true,
       maxTokens = this.config.generation.maxTokens,
       temperature = this.config.generation.temperature
     } = options;
@@ -346,17 +248,7 @@ export class GroqClient {
     }
   }
 
-  /**
-   * Generate structured JSON output
-   * 
-   * @param {string} prompt - Prompt with JSON schema instructions
-   * @param {Object} schema - Expected JSON structure (for validation)
-   * @param {Object} options - Generation options
-   * @returns {Promise<Object>} Parsed JSON response
-   * @throws {AIServiceError} If generation or parsing fails
-   */
   async generateJSON(prompt, schema = null, options = {}) {
-    // Add JSON formatting instructions
     const jsonPrompt = `${prompt}
 
 CRITICAL: Respond with ONLY valid JSON. No markdown, no code blocks, no explanations.
@@ -365,15 +257,12 @@ Output format must match the specified schema exactly.`;
     const response = await this.generateContent(jsonPrompt, options);
 
     try {
-      // Remove any markdown code blocks
       const cleaned = response
         .replace(/```json\n?|\n?```/g, '')
         .trim();
 
-      // Parse JSON
       const parsed = JSON.parse(cleaned);
 
-      // Basic schema validation if provided
       if (schema && typeof schema === 'object') {
         const requiredKeys = Object.keys(schema);
         const missingKeys = requiredKeys.filter(key => !(key in parsed));
@@ -397,11 +286,6 @@ Output format must match the specified schema exactly.`;
     }
   }
 
-  /**
-   * Get usage statistics (if tracking)
-   * 
-   * @returns {Object} Usage stats
-   */
   getUsageStats() {
     // TODO: Implement token usage tracking
     return {

@@ -1,22 +1,10 @@
-/**
- * Global-Fi Ultra - NewsAPI Client
- * 
- * Financial news from NewsAPI.
- * Free tier: 100 requests/day.
- */
+// NewsAPI client for financial news (free tier: 100 requests/day)
 
 import { BaseApiClient } from './BaseApiClient.js';
 import { config } from '../../config/environment.js';
 import { ValidationError } from '../../utils/errors.js';
 
-/**
- * NewsAPI client for financial news
- */
 export class NewsAPIClient extends BaseApiClient {
-    /**
-     * @param {Object} [options]
-     * @param {Function} [options.onCircuitStateChange]
-     */
     constructor(options = {}) {
         super('newsapi', {
             baseURL: 'https://newsapi.org/api',
@@ -28,15 +16,6 @@ export class NewsAPIClient extends BaseApiClient {
         });
     }
 
-    /**
-     * Get financial news articles
-     * @param {Object} [params]
-     * @param {string} [params.q='finance OR stock market'] - Search query
-     * @param {string} [params.language='en'] - Language code
-     * @param {string} [params.sortBy='publishedAt'] - Sort order
-     * @param {number} [params.pageSize=10] - Number of results
-     * @returns {Promise<Object>} Normalized news articles
-     */
     async getEverything(params = {}) {
         const {
             q = 'finance OR stock market',
@@ -55,14 +34,7 @@ export class NewsAPIClient extends BaseApiClient {
         return this._normalizeResponse(response);
     }
 
-    /**
-     * Normalize NewsAPI response to Global-Fi schema
-     * @private
-     * @param {Object} response
-     * @returns {Object}
-     */
     _normalizeResponse(response) {
-        // Handle API errors
         if (response.status === 'error') {
             throw new ValidationError(
                 response.message || 'NewsAPI error',

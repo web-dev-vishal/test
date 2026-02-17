@@ -1,9 +1,4 @@
-/**
- * Global-Fi Ultra - Base API Client
- * 
- * Abstract base class for all external API clients.
- * Includes circuit breaker integration, retry logic, and error handling.
- */
+// Base API client with circuit breaker, retry logic, and error handling
 
 import axios from 'axios';
 import { configureRetry } from '../resilience/RetryStrategy.js';
@@ -11,23 +6,11 @@ import { CircuitBreaker } from '../resilience/CircuitBreaker.js';
 import { ExternalAPIError } from '../../utils/errors.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Base API client with resilience patterns
- */
 export class BaseApiClient {
-    /**
-     * @param {string} name - Client name for logging
-     * @param {Object} options
-     * @param {string} options.baseURL - Base URL for API
-     * @param {number} [options.timeout] - Request timeout in ms
-     * @param {Object} [options.headers] - Default headers
-     * @param {Function} [options.onCircuitStateChange] - Circuit breaker state change callback
-     */
     constructor(name, options) {
         this.name = name;
         this.baseURL = options.baseURL;
 
-        // Create axios instance
         this.client = axios.create({
             baseURL: options.baseURL,
             timeout: options.timeout || 10000,
@@ -37,18 +20,16 @@ export class BaseApiClient {
             },
         });
 
-        // Configure retry logic
         configureRetry(this.client, {
             retries: 3,
             retryDelay: 1000,
         });
 
-        // Create circuit breaker
         this.circuitBreaker = new CircuitBreaker(name, {
             onStateChange: options.onCircuitStateChange,
         });
 
-        // Request interceptor for logging
+        // Request logging
         this.client.interceptors.request.use((config) => {
             config.metadata = { startTime: Date.now() };
             logger.debug(`API Request: ${this.name}`, {
@@ -58,7 +39,7 @@ export class BaseApiClient {
             return config;
         });
 
-        // Response interceptor for logging
+        // Response logging
         this.client.interceptors.response.use(
             (response) => {
                 const duration = Date.now() - response.config.metadata.startTime;
@@ -84,24 +65,12 @@ export class BaseApiClient {
         );
     }
 
-    /**
-     * Execute a request through the circuit breaker
-     * @protected
-     * @template T
-     * @param {Function} requestFn - Function that returns a promise
-     * @returns {Promise<T>}
-     */
+    // Execute request through circuit breaker
     async executeWithCircuitBreaker(requestFn) {
         return this.circuitBreaker.execute(requestFn);
     }
 
-    /**
-     * Make a GET request
-     * @protected
-     * @param {string} endpoint - API endpoint
-     * @param {Object} [params] - Query parameters
-     * @returns {Promise<Object>}
-     */
+    // Make GET request
     async get(endpoint, params = {}) {
         return this.executeWithCircuitBreaker(async () => {
             try {
@@ -113,29 +82,24 @@ export class BaseApiClient {
         });
     }
 
-    /**
-     * Handle and transform API errors
-     * @protected
-     * @param {Error} error
-     * @returns {ExternalAPIError}
-     */
+    // Transform API errors into ExternalAPIError
     _handleError(error) {
-        // Timeout error
+        // Timeout
         if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
             return new ExternalAPIError('E1001', this.name, 'Request timeout', error);
         }
 
-        // Rate limit error (usually 429)
+        // Rate limit (429)
         if (error.response?.status === 429) {
             return new ExternalAPIError('E1002', this.name, 'Rate limit exceeded', error);
         }
 
-        // Invalid response format
+        // Client error (4xx)
         if (error.response?.status >= 400 && error.response?.status < 500) {
             return new ExternalAPIError('E1004', this.name, `Invalid response: ${error.response?.status}`, error);
         }
 
-        // Server error
+        // Server error (5xx)
         if (error.response?.status >= 500) {
             return new ExternalAPIError('E1001', this.name, `Server error: ${error.response?.status}`, error);
         }
@@ -144,10 +108,7 @@ export class BaseApiClient {
         return new ExternalAPIError('E1001', this.name, error.message, error);
     }
 
-    /**
-     * Get circuit breaker status
-     * @returns {Object}
-     */
+    // Get circuit breaker status
     getCircuitBreakerStatus() {
         return this.circuitBreaker.getStatus();
     }

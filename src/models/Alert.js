@@ -1,16 +1,9 @@
-/**
- * Global-Fi Ultra - Alert Model
- * 
- * Price alerts for financial assets.
- */
+// Alert model - price alerts for financial assets
 
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-/**
- * Alert schema
- */
 const alertSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
@@ -96,7 +89,7 @@ alertSchema.index({ userId: 1, symbol: 1, isActive: 1 });
 alertSchema.index({ isActive: 1, isTriggered: 1 });
 alertSchema.index({ expiresAt: 1 });
 
-// Method to check if alert should trigger
+// Check if alert should trigger based on current price
 alertSchema.methods.checkTrigger = function (currentPrice) {
     if (!this.isActive || this.isTriggered) {
         return false;
@@ -135,7 +128,7 @@ alertSchema.methods.checkTrigger = function (currentPrice) {
     return shouldTrigger;
 };
 
-// Method to reset alert
+// Reset alert to active state
 alertSchema.methods.reset = function () {
     this.isTriggered = false;
     this.triggeredAt = null;
@@ -144,9 +137,6 @@ alertSchema.methods.reset = function () {
     return this.save();
 };
 
-/**
- * Alert Model
- */
 export const Alert = mongoose.model('Alert', alertSchema);
 
 export default Alert;

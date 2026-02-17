@@ -1,28 +1,13 @@
-/**
- * Global-Fi Ultra - Watchlist Service
- * 
- * Business logic for watchlist management operations.
- */
+// Watchlist management - CRUD operations for user asset collections
 
 import { logger } from '../config/logger.js';
 
-/**
- * Watchlist Service
- */
 export class WatchlistService {
-    /**
-     * @param {Object} dependencies
-     * @param {import('../infrastructure/repositories/WatchlistRepository.js').WatchlistRepository} dependencies.watchlistRepository
-     */
     constructor({ watchlistRepository }) {
         this.watchlistRepository = watchlistRepository;
     }
 
-    /**
-     * Create a new watchlist
-     * @param {Object} watchlistData - Watchlist data
-     * @returns {Promise<Object>} Created watchlist
-     */
+    // Create new watchlist - enforces name uniqueness per user
     async createWatchlist(watchlistData) {
         try {
             const exists = await this.watchlistRepository.nameExistsForUser(
@@ -44,11 +29,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Get watchlist by ID
-     * @param {string} watchlistId - Watchlist ID
-     * @returns {Promise<Object>} Watchlist
-     */
+    // Get watchlist by ID
     async getWatchlist(watchlistId) {
         try {
             const watchlist = await this.watchlistRepository.findById(watchlistId, true);
@@ -64,12 +45,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Get user's watchlists
-     * @param {string} userId - User ID
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Watchlists
-     */
+    // Get all watchlists for a user
     async getUserWatchlists(userId, options = {}) {
         try {
             return await this.watchlistRepository.findByUserId(userId, options);
@@ -79,11 +55,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * List all watchlists with pagination
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Watchlists and pagination info
-     */
+    // List watchlists with pagination
     async listWatchlists(options = {}) {
         try {
             return await this.watchlistRepository.findAll(options);
@@ -93,12 +65,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Update watchlist
-     * @param {string} watchlistId - Watchlist ID
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object>} Updated watchlist
-     */
+    // Update watchlist
     async updateWatchlist(watchlistId, updateData) {
         try {
             const watchlist = await this.watchlistRepository.update(watchlistId, updateData);
@@ -115,13 +82,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Add asset to watchlist
-     * @param {string} watchlistId - Watchlist ID
-     * @param {string} symbol - Asset symbol
-     * @param {string} notes - Optional notes
-     * @returns {Promise<Object>} Updated watchlist
-     */
+    // Add asset to watchlist
     async addAssetToWatchlist(watchlistId, symbol, notes = '') {
         try {
             const watchlist = await this.watchlistRepository.addAsset(watchlistId, symbol, notes);
@@ -138,12 +99,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Remove asset from watchlist
-     * @param {string} watchlistId - Watchlist ID
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object>} Updated watchlist
-     */
+    // Remove asset from watchlist
     async removeAssetFromWatchlist(watchlistId, symbol) {
         try {
             const watchlist = await this.watchlistRepository.removeAsset(watchlistId, symbol);
@@ -160,11 +116,7 @@ export class WatchlistService {
         }
     }
 
-    /**
-     * Delete watchlist
-     * @param {string} watchlistId - Watchlist ID
-     * @returns {Promise<boolean>} Success status
-     */
+    // Delete watchlist
     async deleteWatchlist(watchlistId) {
         try {
             const success = await this.watchlistRepository.delete(watchlistId);

@@ -1,21 +1,9 @@
-/**
- * Global-Fi Ultra - Alert Repository
- * 
- * Database operations for Alert model.
- */
+// Alert repository for database operations
 
 import { Alert } from '../../models/index.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Alert Repository
- */
 export class AlertRepository {
-    /**
-     * Create a new alert
-     * @param {Object} alertData - Alert data
-     * @returns {Promise<Object>} Created alert
-     */
     async create(alertData) {
         try {
             const alert = new Alert(alertData);
@@ -28,12 +16,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Find alert by ID
-     * @param {string} id - Alert ID
-     * @param {boolean} populate - Whether to populate user data
-     * @returns {Promise<Object|null>} Alert or null
-     */
     async findById(id, populate = false) {
         try {
             let query = Alert.findById(id);
@@ -49,12 +31,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Find alerts by user ID
-     * @param {string} userId - User ID
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Alerts
-     */
     async findByUserId(userId, { isActive = null, sort = '-createdAt', limit = 100 } = {}) {
         try {
             const filter = { userId };
@@ -72,12 +48,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Find alerts by symbol
-     * @param {string} symbol - Asset symbol
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Alerts
-     */
     async findBySymbol(symbol, { isActive = true } = {}) {
         try {
             return await Alert.find({ symbol: symbol.toUpperCase(), isActive })
@@ -89,10 +59,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Find all active alerts
-     * @returns {Promise<Array>} Active alerts
-     */
     async findActive() {
         try {
             return await Alert.find({ isActive: true, isTriggered: false })
@@ -104,11 +70,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Find all alerts with pagination
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Alerts and pagination info
-     */
     async findAll({ page = 1, limit = 20, filter = {}, sort = '-createdAt' } = {}) {
         try {
             const skip = (page - 1) * limit;
@@ -138,12 +99,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Update alert by ID
-     * @param {string} id - Alert ID
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object|null>} Updated alert or null
-     */
     async update(id, updateData) {
         try {
             const alert = await Alert.findByIdAndUpdate(
@@ -163,12 +118,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Mark alert as triggered
-     * @param {string} id - Alert ID
-     * @param {number} triggeredPrice - Price at which alert was triggered
-     * @returns {Promise<Object|null>} Updated alert or null
-     */
     async markTriggered(id, triggeredPrice) {
         try {
             const alert = await Alert.findByIdAndUpdate(
@@ -195,12 +144,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Check and trigger alerts for a symbol
-     * @param {string} symbol - Asset symbol
-     * @param {number} currentPrice - Current price
-     * @returns {Promise<Array>} Triggered alerts
-     */
     async checkAndTrigger(symbol, currentPrice) {
         try {
             const alerts = await this.findBySymbol(symbol, { isActive: true });
@@ -225,11 +168,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Delete alert by ID
-     * @param {string} id - Alert ID
-     * @returns {Promise<boolean>} Success status
-     */
     async delete(id) {
         try {
             const result = await Alert.findByIdAndDelete(id);
@@ -246,10 +184,6 @@ export class AlertRepository {
         }
     }
 
-    /**
-     * Deactivate expired alerts
-     * @returns {Promise<number>} Number of deactivated alerts
-     */
     async deactivateExpired() {
         try {
             const result = await Alert.updateMany(

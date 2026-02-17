@@ -1,19 +1,8 @@
-/**
- * Global-Fi Ultra - Retry Strategy
- * 
- * Axios retry configuration with exponential backoff.
- */
+// Axios retry configuration with exponential backoff
 
 import axiosRetry from 'axios-retry';
 import { logger } from '../../config/logger.js';
 
-/**
- * Configure axios instance with retry logic
- * @param {import('axios').AxiosInstance} axiosInstance
- * @param {Object} [options]
- * @param {number} [options.retries] - Number of retries
- * @param {number} [options.retryDelay] - Base delay in ms
- */
 export const configureRetry = (axiosInstance, options = {}) => {
     const { retries = 3, retryDelay = 1000 } = options;
 

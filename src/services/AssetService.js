@@ -1,28 +1,13 @@
-/**
- * Global-Fi Ultra - Asset Service
- * 
- * Business logic for financial asset management operations.
- */
+// Asset management - CRUD operations for stocks, crypto, forex, etc.
 
 import { logger } from '../config/logger.js';
 
-/**
- * Asset Service
- */
 export class AssetService {
-    /**
-     * @param {Object} dependencies
-     * @param {import('../infrastructure/repositories/FinancialAssetRepository.js').FinancialAssetRepository} dependencies.financialAssetRepository
-     */
     constructor({ financialAssetRepository }) {
         this.financialAssetRepository = financialAssetRepository;
     }
 
-    /**
-     * Create a new asset
-     * @param {Object} assetData - Asset data
-     * @returns {Promise<Object>} Created asset
-     */
+    // Create new asset - checks for duplicate symbols
     async createAsset(assetData) {
         try {
             const existing = await this.financialAssetRepository.findBySymbol(assetData.symbol);
@@ -40,11 +25,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Get asset by symbol
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object>} Asset
-     */
+    // Get asset by symbol
     async getAsset(symbol) {
         try {
             const asset = await this.financialAssetRepository.findBySymbol(symbol);
@@ -60,11 +41,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Search/list assets
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Assets and pagination info
-     */
+    // Search/list assets with pagination
     async searchAssets(options = {}) {
         try {
             return await this.financialAssetRepository.findAll(options);
@@ -74,12 +51,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Update asset
-     * @param {string} symbol - Asset symbol
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object>} Updated asset
-     */
+    // Update asset
     async updateAsset(symbol, updateData) {
         try {
             const asset = await this.financialAssetRepository.updateBySymbol(symbol, updateData);
@@ -96,13 +68,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Update asset price
-     * @param {string} symbol - Asset symbol
-     * @param {number} price - New price
-     * @param {string} source - Price source
-     * @returns {Promise<Object>} Updated asset
-     */
+    // Update asset price from external API
     async updateAssetPrice(symbol, price, source = 'api') {
         try {
             const asset = await this.financialAssetRepository.updatePrice(symbol, price, source);
@@ -118,11 +84,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Delete asset
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object>} Deleted asset
-     */
+    // Delete asset
     async deleteAsset(symbol) {
         try {
             const asset = await this.financialAssetRepository.deleteBySymbol(symbol);
@@ -139,12 +101,7 @@ export class AssetService {
         }
     }
 
-    /**
-     * Get assets by type
-     * @param {string} type - Asset type
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Assets
-     */
+    // Get assets by type (stock, crypto, forex, etc.)
     async getAssetsByType(type, options = {}) {
         try {
             return await this.financialAssetRepository.findByType(type, options);

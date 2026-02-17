@@ -1,23 +1,11 @@
-/**
- * Global-Fi Ultra - FRED Client
- * 
- * Economic indicators from Federal Reserve Economic Data.
- * No official rate limit.
- */
+// FRED client for economic indicators (no official rate limit)
 
 import { BaseApiClient } from './BaseApiClient.js';
 import { config } from '../../config/environment.js';
 import { ValidationError } from '../../utils/errors.js';
 import { Money } from '../../utils/valueObjects.js';
 
-/**
- * FRED API client for economic indicators
- */
 export class FREDClient extends BaseApiClient {
-    /**
-     * @param {Object} [options]
-     * @param {Function} [options.onCircuitStateChange]
-     */
     constructor(options = {}) {
         super('fred', {
             baseURL: 'https://api.stlouisfed.org/fred',
@@ -28,13 +16,6 @@ export class FREDClient extends BaseApiClient {
         this.apiKey = config.apiKeys.fred;
     }
 
-    /**
-     * Get observations for an economic series
-     * @param {Object} [params]
-     * @param {string} [params.seriesId='GDP'] - FRED series ID
-     * @param {number} [params.limit=1] - Number of observations
-     * @returns {Promise<Object>} Normalized economic data
-     */
     async getSeriesObservations(params = {}) {
         const { seriesId = 'GDP', limit = 1 } = params;
 
@@ -49,13 +30,6 @@ export class FREDClient extends BaseApiClient {
         return this._normalizeResponse(response, seriesId);
     }
 
-    /**
-     * Normalize FRED response to Global-Fi schema
-     * @private
-     * @param {Object} response
-     * @param {string} seriesId
-     * @returns {Object}
-     */
     _normalizeResponse(response, seriesId) {
         if (!response.observations || response.observations.length === 0) {
             throw new ValidationError(

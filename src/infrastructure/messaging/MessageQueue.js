@@ -1,16 +1,9 @@
-/**
- * Global-Fi Ultra - Message Queue Service
- * 
- * Wrapper for RabbitMQ operations with structured message handling.
- */
+// Message queue wrapper for RabbitMQ operations
 
 import { getRabbitMQChannel, isRabbitMQConnected } from '../../config/rabbitmq.js';
 import { config } from '../../config/environment.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Message Queue Service
- */
 export class MessageQueue {
     constructor() {
         this.prefix = config.rabbitmq.queuePrefix;
@@ -21,12 +14,6 @@ export class MessageQueue {
         };
     }
 
-    /**
-     * Publish message to a queue
-     * @param {string} queueName - Queue name (without prefix)
-     * @param {Object} message - Message payload
-     * @returns {boolean} - Success status
-     */
     async publish(queueName, message) {
         const channel = getRabbitMQChannel();
 
@@ -60,11 +47,6 @@ export class MessageQueue {
         }
     }
 
-    /**
-     * Consume messages from a queue
-     * @param {string} queueName - Queue name (without prefix)
-     * @param {Function} handler - Message handler function
-     */
     async consume(queueName, handler) {
         const channel = getRabbitMQChannel();
 
@@ -104,10 +86,6 @@ export class MessageQueue {
         }
     }
 
-    /**
-     * Publish financial data event
-     * @param {Object} data - Financial data payload
-     */
     async publishFinancialData(data) {
         return this.publish('financial-data', {
             type: 'financial-data',
@@ -115,10 +93,6 @@ export class MessageQueue {
         });
     }
 
-    /**
-     * Publish audit log event
-     * @param {Object} log - Audit log entry
-     */
     async publishAuditLog(log) {
         return this.publish('audit-logs', {
             type: 'audit-log',
@@ -126,10 +100,6 @@ export class MessageQueue {
         });
     }
 
-    /**
-     * Publish notification
-     * @param {Object} notification - Notification payload
-     */
     async publishNotification(notification) {
         return this.publish('notifications', {
             type: 'notification',
@@ -137,9 +107,6 @@ export class MessageQueue {
         });
     }
 
-    /**
-     * Check if RabbitMQ is connected
-     */
     isConnected() {
         return isRabbitMQConnected();
     }

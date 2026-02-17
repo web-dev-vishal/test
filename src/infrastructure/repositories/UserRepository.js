@@ -1,21 +1,10 @@
-/**
- * Global-Fi Ultra - User Repository
- * 
- * Database operations for User model.
- */
+// User repository - database operations for User model
 
 import { User } from '../../models/index.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * User Repository
- */
 export class UserRepository {
-    /**
-     * Create a new user
-     * @param {Object} userData - User data
-     * @returns {Promise<Object>} Created user
-     */
+    // Create new user
     async create(userData) {
         try {
             const user = new User(userData);
@@ -28,11 +17,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Find user by ID
-     * @param {string} id - User ID
-     * @returns {Promise<Object|null>} User or null
-     */
+    // Find user by ID
     async findById(id) {
         try {
             return await User.findById(id);
@@ -42,11 +27,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Find user by email
-     * @param {string} email - User email
-     * @returns {Promise<Object|null>} User or null
-     */
+    // Find user by email
     async findByEmail(email) {
         try {
             return await User.findOne({ email: email.toLowerCase() });
@@ -56,15 +37,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Find all users with pagination
-     * @param {Object} options - Query options
-     * @param {number} options.page - Page number
-     * @param {number} options.limit - Items per page
-     * @param {Object} options.filter - Filter criteria
-     * @param {string} options.sort - Sort criteria
-     * @returns {Promise<Object>} Users and pagination info
-     */
+    // Find all users with pagination
     async findAll({ page = 1, limit = 20, filter = {}, sort = '-createdAt' } = {}) {
         try {
             const skip = (page - 1) * limit;
@@ -93,12 +66,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Update user by ID
-     * @param {string} id - User ID
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object|null>} Updated user or null
-     */
+    // Update user by ID
     async update(id, updateData) {
         try {
             const user = await User.findByIdAndUpdate(
@@ -118,11 +86,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Delete user by ID (soft delete)
-     * @param {string} id - User ID
-     * @returns {Promise<Object|null>} Deleted user or null
-     */
+    // Soft delete user (set isActive = false)
     async delete(id) {
         try {
             const user = await User.findByIdAndUpdate(
@@ -142,11 +106,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Hard delete user by ID
-     * @param {string} id - User ID
-     * @returns {Promise<boolean>} Success status
-     */
+    // Hard delete user (permanent removal)
     async hardDelete(id) {
         try {
             const result = await User.findByIdAndDelete(id);
@@ -163,12 +123,7 @@ export class UserRepository {
         }
     }
 
-    /**
-     * Check if email exists
-     * @param {string} email - Email to check
-     * @param {string} excludeId - User ID to exclude from check
-     * @returns {Promise<boolean>} True if exists
-     */
+    // Check if email exists (optionally exclude a user ID)
     async emailExists(email, excludeId = null) {
         try {
             const query = { email: email.toLowerCase() };

@@ -1,52 +1,17 @@
-/**
- * Global-Fi Ultra - Watchlist Controller
- * 
- * Handles HTTP requests for watchlist management and asset assignment.
- * A watchlist is a named collection of financial assets that a user wants
- * to track. Supports full CRUD plus asset add/remove operations.
- * 
- * Error Codes:
- * - E3001: Watchlist not found (404)
- * - E3002: Watchlist name already exists for user (409 Conflict)
- * 
- * @module controllers/WatchlistController
- */
+// Watchlist management - users can create named collections of assets to track
 
 import { logger } from '../config/logger.js';
 
-/**
- * Controller class for watchlist management HTTP endpoints.
- * 
- * Injected via DI container with WatchlistService dependency.
- */
 export class WatchlistController {
-    /**
-     * Creates a new WatchlistController instance.
-     * 
-     * @param {Object} dependencies - DI-injected dependencies
-     * @param {import('../services/WatchlistService.js').WatchlistService} dependencies.watchlistService
-     */
     constructor({ watchlistService }) {
-        /** @type {import('../services/WatchlistService.js').WatchlistService} */
         this.watchlistService = watchlistService;
     }
 
-    /**
-     * GET /watchlists — List watchlists with optional filtering.
-     * 
-     * If `userId` is provided, returns only that user's watchlists.
-     * Otherwise, returns a paginated list of all watchlists.
-     * 
-     * @param {import('express').Request} req - Express request object
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // List watchlists - if userId provided, returns just that user's lists
     async listWatchlists(req, res, next) {
         try {
             const { userId, page, limit, isPublic, sort } = req.query;
 
-            // Shortcut: return user-specific watchlists when userId is provided
             if (userId) {
                 const watchlists = await this.watchlistService.getUserWatchlists(userId, {
                     sort: sort || '-createdAt',
@@ -59,7 +24,6 @@ export class WatchlistController {
                 });
             }
 
-            // General listing with pagination and optional isPublic filter
             const filter = {};
             if (isPublic !== undefined) {
                 filter.isPublic = isPublic;
@@ -82,14 +46,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * GET /watchlists/:id — Get a single watchlist by its MongoDB ObjectID.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Get single watchlist by ID
     async getWatchlist(req, res, next) {
         try {
             const watchlist = await this.watchlistService.getWatchlist(req.params.id);
@@ -110,17 +67,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * POST /watchlists — Create a new watchlist.
-     * 
-     * Returns 409 if a watchlist with the same name already exists
-     * for this user (name + userId uniqueness constraint).
-     * 
-     * @param {import('express').Request} req - Express request (validated body)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Create new watchlist - name must be unique per user
     async createWatchlist(req, res, next) {
         try {
             const watchlist = await this.watchlistService.createWatchlist(req.body);
@@ -142,16 +89,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * PUT /watchlists/:id — Update a watchlist's metadata (name, description, tags, etc.).
-     * 
-     * Does NOT modify the assets array — use addAsset/removeAsset for that.
-     * 
-     * @param {import('express').Request} req - Express request (params.id + validated body)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Update watchlist metadata - use addAsset/removeAsset to modify assets
     async updateWatchlist(req, res, next) {
         try {
             const watchlist = await this.watchlistService.updateWatchlist(req.params.id, req.body);
@@ -173,14 +111,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * DELETE /watchlists/:id — Delete a watchlist and all its asset associations.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Delete watchlist permanently
     async deleteWatchlist(req, res, next) {
         try {
             await this.watchlistService.deleteWatchlist(req.params.id);
@@ -201,17 +132,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * POST /watchlists/:id/assets — Add a financial asset to a watchlist.
-     * 
-     * Adds the specified symbol (e.g., "AAPL", "BTC") to the watchlist's
-     * assets array with optional notes.
-     * 
-     * @param {import('express').Request} req - Express request (params.id + body.symbol)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Add asset to watchlist (e.g., "AAPL", "BTC")
     async addAsset(req, res, next) {
         try {
             const { symbol, notes } = req.body;
@@ -238,17 +159,7 @@ export class WatchlistController {
         }
     }
 
-    /**
-     * DELETE /watchlists/:id/assets/:symbol — Remove an asset from a watchlist.
-     * 
-     * Removes the asset matching the given symbol from the watchlist's
-     * assets array. The asset record in the assets collection is not affected.
-     * 
-     * @param {import('express').Request} req - Express request (params.id + params.symbol)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Remove asset from watchlist - doesn't delete the asset itself
     async removeAsset(req, res, next) {
         try {
             const watchlist = await this.watchlistService.removeAssetFromWatchlist(

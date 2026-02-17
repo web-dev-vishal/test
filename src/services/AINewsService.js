@@ -1,34 +1,9 @@
-/**
- * AI News Analysis Service
- * 
- * Provides AI-powered news analysis including sentiment analysis,
- * entity extraction, and market impact assessment.
- * 
- * @module application/services/AINewsService
- */
+// AI news analysis - sentiment, entity extraction, market impact
+// Uses Groq AI for NLP tasks
 
 import { logger } from '../config/logger.js';
 
-/**
- * AI News Service
- * 
- * @class
- * @example
- * const service = new AINewsService({
- *   groqClient,
- *   cacheService
- * });
- * 
- * const analysis = await service.analyzeNews(newsArticles);
- */
 export class AINewsService {
-  /**
-   * Initialize service with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {GroqClient} dependencies.groqClient - AI client
-   * @param {RedisCache} dependencies.cacheService - Cache service
-   */
   constructor({ groqClient, cacheService }) {
     if (!groqClient) {
       throw new Error('GroqClient is required');
@@ -39,13 +14,7 @@ export class AINewsService {
     this.logger = logger;
   }
 
-  /**
-   * Analyze sentiment of news article
-   * 
-   * @param {string} headline - News headline
-   * @param {string} content - Article content
-   * @returns {Promise<Object>} Sentiment analysis
-   */
+  // Analyze sentiment - positive/negative/neutral with confidence score
   async analyzeSentiment(headline, content = '') {
     const prompt = `Analyze the sentiment of this financial news:
 
@@ -92,12 +61,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Extract key entities from news
-   * 
-   * @param {string} text - News text
-   * @returns {Promise<Object>} Extracted entities
-   */
+  // Extract companies, people, locations, financial metrics from text
   async extractEntities(text) {
     const prompt = `Extract key financial entities from this text:
 
@@ -144,12 +108,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Analyze market impact of news
-   * 
-   * @param {Array<Object>} newsArticles - Array of news articles
-   * @returns {Promise<Object>} Market impact analysis
-   */
+  // Analyze market impact of news - sentiment, themes, affected sectors
   async analyzeMarketImpact(newsArticles) {
     if (!newsArticles || newsArticles.length === 0) {
       return {
@@ -223,13 +182,7 @@ Return JSON format:
     }
   }
 
-  /**
-   * Generate news summary
-   * 
-   * @param {Array<Object>} newsArticles - Array of news articles
-   * @param {number} maxLength - Max summary length in words
-   * @returns {Promise<string>} Summary text
-   */
+  // Generate concise summary of multiple news articles
   async generateSummary(newsArticles, maxLength = 100) {
     if (!newsArticles || newsArticles.length === 0) {
       return 'No news available';
@@ -273,12 +226,7 @@ Provide a concise, professional summary.`;
     }
   }
 
-  /**
-   * Compare news sentiment over time
-   * 
-   * @param {Array<Object>} historicalNews - News grouped by time period
-   * @returns {Promise<Object>} Sentiment trend analysis
-   */
+  // Analyze sentiment trend over time - improving/declining/stable
   async analyzeSentimentTrend(historicalNews) {
     const prompt = `Analyze the sentiment trend in these financial news headlines over time:
 

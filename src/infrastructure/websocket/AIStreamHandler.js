@@ -1,38 +1,8 @@
-/**
- * AI Stream Handler for WebSocket
- * 
- * Handles real-time AI response streaming to WebSocket clients.
- * Supports chat-style interactions and live market analysis.
- * 
- * @module infrastructure/websocket/AIStreamHandler
- */
+// AI stream handler for real-time WebSocket streaming
 
 import { logger } from '../../config/logger.js';
 
-/**
- * AI Stream Handler
- * 
- * @class
- * @example
- * const handler = new AIStreamHandler({
- *   io: socketServer,
- *   groqClient,
- *   aiNewsService,
- *   aiMarketService
- * });
- * 
- * handler.initialize();
- */
 export class AIStreamHandler {
-  /**
-   * Initialize handler with dependencies
-   * 
-   * @param {Object} dependencies
-   * @param {Object} dependencies.io - Socket.io server instance
-   * @param {GroqClient} dependencies.groqClient - AI client
-   * @param {AINewsService} dependencies.aiNewsService - News service
-   * @param {AIMarketService} dependencies.aiMarketService - Market service
-   */
   constructor({ io, groqClient, aiNewsService, aiMarketService }) {
     if (!io) {
       throw new Error('Socket.io server is required');
@@ -51,9 +21,6 @@ export class AIStreamHandler {
     this.activeStreams = new Map();
   }
 
-  /**
-   * Initialize WebSocket event handlers
-   */
   initialize() {
     this.io.on('connection', (socket) => {
       this.logger.info('AI client connected', {
@@ -61,7 +28,6 @@ export class AIStreamHandler {
         clientIp: socket.handshake.address
       });
 
-      // Register event handlers
       socket.on('ai:chat', (data) => this.handleChat(socket, data));
       socket.on('ai:analyze', (data) => this.handleAnalyze(socket, data));
       socket.on('ai:sentiment', (data) => this.handleSentiment(socket, data));
@@ -76,12 +42,6 @@ export class AIStreamHandler {
     this.logger.info('AI stream handler initialized');
   }
 
-  /**
-   * Handle chat message with streaming response
-   * 
-   * @param {Object} socket - Socket instance
-   * @param {Object} data - Message data
-   */
   async handleChat(socket, data) {
     const { message, sessionId } = data;
 
@@ -97,19 +57,15 @@ export class AIStreamHandler {
     });
 
     try {
-      // Mark stream as active
       this.activeStreams.set(socket.id, true);
 
-      // Send start event
       socket.emit('ai:stream:start', { sessionId });
 
       let fullResponse = '';
 
-      // Stream response
       await this.groqClient.streamContent(
         message,
         (chunk) => {
-          // Check if stream was stopped
           if (!this.activeStreams.get(socket.id)) {
             throw new Error('Stream stopped by client');
           }
@@ -124,7 +80,6 @@ export class AIStreamHandler {
         { complex: true }
       );
 
-      // Send completion event
       socket.emit('ai:stream:complete', {
         sessionId,
         fullResponse,
@@ -152,12 +107,6 @@ export class AIStreamHandler {
     }
   }
 
-  /**
-   * Handle asset analysis request
-   * 
-   * @param {Object} socket - Socket instance
-   * @param {Object} data - Analysis data
-   */
   async handleAnalyze(socket, data) {
     const { symbol, priceData } = data;
 
@@ -201,12 +150,6 @@ export class AIStreamHandler {
     }
   }
 
-  /**
-   * Handle sentiment analysis request
-   * 
-   * @param {Object} socket - Socket instance
-   * @param {Object} data - Sentiment data
-   */
   async handleSentiment(socket, data) {
     const { text, type } = data;
 
@@ -229,7 +172,6 @@ export class AIStreamHandler {
       if (type === 'news') {
         result = await this.aiNewsService.analyzeSentiment(text);
       } else {
-        // Generic sentiment analysis
         const prompt = `Analyze the sentiment of this text: "${text}"
         
 Return JSON: { "sentiment": "positive|negative|neutral", "confidence": 85 }`;
@@ -262,12 +204,6 @@ Return JSON: { "sentiment": "positive|negative|neutral", "confidence": 85 }`;
     }
   }
 
-  /**
-   * Handle recommendation request
-   * 
-   * @param {Object} socket - Socket instance
-   * @param {Object} data - Recommendation data
-   */
   async handleRecommend(socket, data) {
     const { userProfile, marketData } = data;
 
@@ -310,11 +246,6 @@ Return JSON: { "sentiment": "positive|negative|neutral", "confidence": 85 }`;
     }
   }
 
-  /**
-   * Handle stream stop request
-   * 
-   * @param {Object} socket - Socket instance
-   */
   handleStopStream(socket) {
     this.logger.info('AI stream stop requested', {
       socketId: socket.id
@@ -324,25 +255,14 @@ Return JSON: { "sentiment": "positive|negative|neutral", "confidence": 85 }`;
     socket.emit('ai:stream:stopped');
   }
 
-  /**
-   * Handle client disconnect
-   * 
-   * @param {Object} socket - Socket instance
-   */
   handleDisconnect(socket) {
     this.logger.info('AI client disconnected', {
       socketId: socket.id
     });
 
-    // Clean up active streams
     this.activeStreams.delete(socket.id);
   }
 
-  /**
-   * Broadcast market insight to all connected clients
-   * 
-   * @param {Object} insight - Market insight data
-   */
   broadcastInsight(insight) {
     this.io.emit('ai:insight', {
       insight,
@@ -355,20 +275,10 @@ Return JSON: { "sentiment": "positive|negative|neutral", "confidence": 85 }`;
     });
   }
 
-  /**
-   * Get active connections count
-   * 
-   * @returns {number} Active connections
-   */
   getActiveConnections() {
     return this.io.sockets.sockets.size;
   }
 
-  /**
-   * Get active streams count
-   * 
-   * @returns {number} Active streams
-   */
   getActiveStreams() {
     return Array.from(this.activeStreams.values()).filter(Boolean).length;
   }

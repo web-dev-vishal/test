@@ -1,16 +1,9 @@
-/**
- * Global-Fi Ultra - Financial Asset Model
- * 
- * Tracks financial assets (stocks, crypto, forex) with current prices.
- */
+// Financial asset model - stocks, crypto, forex with price tracking
 
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-/**
- * Financial Asset schema
- */
 const financialAssetSchema = new Schema({
     symbol: {
         type: String,
@@ -68,17 +61,15 @@ const financialAssetSchema = new Schema({
     collection: 'financial_assets',
 });
 
-// Compound indexes for common queries
 financialAssetSchema.index({ type: 1, isActive: 1 });
 financialAssetSchema.index({ symbol: 1, type: 1 });
 financialAssetSchema.index({ createdAt: -1 });
 
-// Method to update price
+// Update price and add to history (keeps last 100 entries)
 financialAssetSchema.methods.updatePrice = function (price, source = 'api') {
     this.currentPrice = price;
     this.lastUpdated = new Date();
 
-    // Add to price history (keep last 100 entries)
     this.priceHistory.push({
         price,
         timestamp: new Date(),
@@ -92,9 +83,6 @@ financialAssetSchema.methods.updatePrice = function (price, source = 'api') {
     return this.save();
 };
 
-/**
- * Financial Asset Model
- */
 export const FinancialAsset = mongoose.model('FinancialAsset', financialAssetSchema);
 
 export default FinancialAsset;

@@ -1,28 +1,10 @@
-/**
- * Global-Fi Ultra - Financial Data Service
- * 
- * Main orchestration service that aggregates data from all 6 APIs
- * using Promise.allSettled() for resilience.
- */
+// Financial data orchestration - aggregates from 6 APIs with resilience
+// Uses Promise.allSettled for fault tolerance
 
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../config/logger.js';
 
-/**
- * Financial Data Orchestration Service
- */
 export class FinancialDataService {
-    /**
-     * @param {Object} dependencies
-     * @param {import('../infrastructure/http/AlphaVantageClient.js').AlphaVantageClient} dependencies.alphaVantageClient
-     * @param {import('../infrastructure/http/CoinGeckoClient.js').CoinGeckoClient} dependencies.coinGeckoClient
-     * @param {import('../infrastructure/http/ExchangeRateClient.js').ExchangeRateClient} dependencies.exchangeRateClient
-     * @param {import('../infrastructure/http/NewsAPIClient.js').NewsAPIClient} dependencies.newsAPIClient
-     * @param {import('../infrastructure/http/FREDClient.js').FREDClient} dependencies.fredClient
-     * @param {import('../infrastructure/http/FinnhubClient.js').FinnhubClient} dependencies.finnhubClient
-     * @param {import('../infrastructure/cache/RedisCache.js').RedisCache} dependencies.cache
-     * @param {import('../infrastructure/repositories/AuditLogRepository.js').AuditLogRepository} dependencies.auditLogRepository
-     */
     constructor(dependencies) {
         this.alphaVantageClient = dependencies.alphaVantageClient;
         this.coinGeckoClient = dependencies.coinGeckoClient;
@@ -34,16 +16,7 @@ export class FinancialDataService {
         this.auditLogRepository = dependencies.auditLogRepository;
     }
 
-    /**
-     * Execute the orchestration
-     * @param {Object} [options]
-     * @param {string} [options.stockSymbol='IBM']
-     * @param {string} [options.cryptoIds='bitcoin,ethereum']
-     * @param {string} [options.baseCurrency='USD']
-     * @param {string} [options.newsQuery='finance OR stock market']
-     * @param {string} [options.fredSeriesId='GDP']
-     * @returns {Promise<Object>} Global-Fi normalized data
-     */
+    // Main orchestration - fetches from all 6 APIs in parallel
     async execute(options = {}) {
         const requestId = uuidv4();
         const startTime = Date.now();
@@ -82,7 +55,7 @@ export class FinancialDataService {
             ),
         ];
 
-        // Execute all calls with Promise.allSettled
+        // Execute all calls in parallel with fault tolerance
         const results = await Promise.allSettled(apiCalls);
 
         // Process results
@@ -196,14 +169,7 @@ export class FinancialDataService {
         return response;
     }
 
-    /**
-     * Fetch data with caching
-     * @private
-     * @param {string} service - Service name
-     * @param {string} cacheKey - Cache key identifier
-     * @param {Function} fetchFn - Function to fetch data
-     * @returns {Promise<{data: Object, fromCache: boolean}>}
-     */
+    // Helper: fetch with caching
     async _fetchWithCache(service, cacheKey, fetchFn) {
         const fullKey = this.cache.buildKey(service, cacheKey);
         const ttl = this.cache.getTTL(service);
@@ -211,10 +177,7 @@ export class FinancialDataService {
         return this.cache.getOrSet(fullKey, fetchFn, ttl);
     }
 
-    /**
-     * Get cached data only (no API calls)
-     * @returns {Promise<Object|null>}
-     */
+    // Get cached data only - no API calls
     async getCachedData() {
         const services = ['alpha_vantage', 'coingecko', 'exchangerate_api', 'newsapi', 'fred', 'finnhub'];
         const cacheKeys = ['stocks:IBM', 'crypto:bitcoin,ethereum', 'forex:USD', 'news:finance OR stock', 'economic:GDP', 'marketnews:general'];

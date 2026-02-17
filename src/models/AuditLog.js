@@ -1,16 +1,10 @@
-/**
- * Global-Fi Ultra - Audit Log Model
- * 
- * Mongoose schema for orchestration audit logs.
- */
+// Audit log model - tracks API orchestration performance
 
 import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-/**
- * Individual API call result schema
- */
+// Individual API call result
 const apiCallResultSchema = new Schema({
     service: {
         type: String,
@@ -40,9 +34,6 @@ const apiCallResultSchema = new Schema({
     },
 }, { _id: false });
 
-/**
- * Audit log schema
- */
 const auditLogSchema = new Schema({
     requestId: {
         type: String,
@@ -83,13 +74,9 @@ const auditLogSchema = new Schema({
     collection: 'audit_logs',
 });
 
-// Indexes for common queries
 auditLogSchema.index({ createdAt: -1 });
 auditLogSchema.index({ status: 1, createdAt: -1 });
 
-/**
- * Audit Log Model
- */
 export const AuditLog = mongoose.model('AuditLog', auditLogSchema);
 
 export default AuditLog;

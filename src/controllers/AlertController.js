@@ -1,61 +1,19 @@
-/**
- * Global-Fi Ultra - Alert Controller
- * 
- * Handles HTTP requests for price alert management endpoints. Users can
- * create alerts that trigger when an asset's price crosses a threshold
- * (above, below, or equals a target price).
- * 
- * Error Codes:
- * - E4001: Alert not found (404)
- * 
- * @module controllers/AlertController
- */
+// Price alerts - notify users when assets hit target prices
+// Supports above/below/equals conditions
 
 import { logger } from '../config/logger.js';
 
-/**
- * Controller class for alert management HTTP endpoints.
- * 
- * Injected via DI container with AlertService dependency.
- * Supports full CRUD operations plus activate/deactivate actions.
- */
 export class AlertController {
-    /**
-     * Creates a new AlertController instance.
-     * 
-     * @param {Object} dependencies - DI-injected dependencies
-     * @param {import('../services/AlertService.js').AlertService} dependencies.alertService - Alert business logic service
-     */
     constructor({ alertService }) {
-        /** @type {import('../services/AlertService.js').AlertService} */
         this.alertService = alertService;
     }
 
-    /**
-     * GET /alerts — List alerts with optional filtering by userId, symbol, and status.
-     * 
-     * If `userId` is provided in query params, returns that user's alerts directly.
-     * Otherwise, returns a paginated list of all alerts with optional filters.
-     * 
-     * Query Parameters:
-     * - `userId` (string): Filter to a specific user's alerts
-     * - `symbol` (string): Filter by asset symbol (auto-uppercased)
-     * - `isActive` (boolean): Filter by active/inactive status
-     * - `isTriggered` (boolean): Filter by triggered/untriggered status
-     * - `page` (number, default 1): Page number
-     * - `limit` (number, default 20): Results per page
-     * - `sort` (string, default '-createdAt'): Sort field with direction
-     * 
-     * @param {import('express').Request} req - Express request object
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // List alerts with optional filters - if userId provided, returns just that user's alerts
     async listAlerts(req, res, next) {
         try {
             const { userId, symbol, isActive, isTriggered, page, limit, sort } = req.query;
 
-            // Shortcut path: if userId is provided, use the dedicated user-alerts method
+            // Fast path for user-specific alerts
             if (userId) {
                 const alerts = await this.alertService.getUserAlerts(userId, {
                     isActive: isActive !== undefined ? isActive : null,
@@ -69,7 +27,7 @@ export class AlertController {
                 });
             }
 
-            // General listing path: apply filters and paginate
+            // General listing with filters
             const filter = {};
             if (symbol) filter.symbol = symbol.toUpperCase();
             if (isActive !== undefined) filter.isActive = isActive;
@@ -92,14 +50,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * GET /alerts/:id — Get a single alert by its MongoDB ObjectID.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Get single alert by ID
     async getAlert(req, res, next) {
         try {
             const alert = await this.alertService.getAlert(req.params.id);
@@ -120,17 +71,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * POST /alerts — Create a new price alert.
-     * 
-     * The request body specifies the symbol, condition (above/below/equals),
-     * target price, and optional notification preferences.
-     * 
-     * @param {import('express').Request} req - Express request (validated body)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Create new price alert
     async createAlert(req, res, next) {
         try {
             const alert = await this.alertService.createAlert(req.body);
@@ -146,14 +87,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * PUT /alerts/:id — Update an existing alert's configuration.
-     * 
-     * @param {import('express').Request} req - Express request (params.id + validated body)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Update existing alert
     async updateAlert(req, res, next) {
         try {
             const alert = await this.alertService.updateAlert(req.params.id, req.body);
@@ -175,14 +109,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * DELETE /alerts/:id — Permanently delete an alert.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Delete alert permanently
     async deleteAlert(req, res, next) {
         try {
             await this.alertService.deleteAlert(req.params.id);
@@ -203,17 +130,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * PATCH /alerts/:id/activate — Enable an alert for price monitoring.
-     * 
-     * Sets `isActive` to `true`, allowing the alert evaluation background
-     * process to check this alert against live prices.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Turn alert on - starts monitoring price
     async activateAlert(req, res, next) {
         try {
             const alert = await this.alertService.updateAlert(req.params.id, { isActive: true });
@@ -235,17 +152,7 @@ export class AlertController {
         }
     }
 
-    /**
-     * PATCH /alerts/:id/deactivate — Disable an alert (stop price monitoring).
-     * 
-     * Sets `isActive` to `false`. The alert record is retained for reference
-     * but will no longer trigger notifications.
-     * 
-     * @param {import('express').Request} req - Express request (params.id required)
-     * @param {import('express').Response} res - Express response object
-     * @param {import('express').NextFunction} next - Express next function
-     * @returns {Promise<void>}
-     */
+    // Turn alert off - stops monitoring but keeps the record
     async deactivateAlert(req, res, next) {
         try {
             const alert = await this.alertService.updateAlert(req.params.id, { isActive: false });

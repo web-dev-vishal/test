@@ -1,28 +1,13 @@
-/**
- * Global-Fi Ultra - Alert Service
- * 
- * Business logic for alert management operations.
- */
+// Alert management - create, update, check triggers
 
 import { logger } from '../config/logger.js';
 
-/**
- * Alert Service
- */
 export class AlertService {
-    /**
-     * @param {Object} dependencies
-     * @param {import('../infrastructure/repositories/AlertRepository.js').AlertRepository} dependencies.alertRepository
-     */
     constructor({ alertRepository }) {
         this.alertRepository = alertRepository;
     }
 
-    /**
-     * Create a new alert
-     * @param {Object} alertData - Alert data
-     * @returns {Promise<Object>} Created alert
-     */
+    // Create new alert
     async createAlert(alertData) {
         try {
             const alert = await this.alertRepository.create(alertData);
@@ -34,11 +19,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Get alert by ID
-     * @param {string} alertId - Alert ID
-     * @returns {Promise<Object>} Alert
-     */
+    // Get alert by ID
     async getAlert(alertId) {
         try {
             const alert = await this.alertRepository.findById(alertId, true);
@@ -54,12 +35,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Get user's alerts
-     * @param {string} userId - User ID
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Alerts
-     */
+    // Get all alerts for a user
     async getUserAlerts(userId, options = {}) {
         try {
             return await this.alertRepository.findByUserId(userId, options);
@@ -69,10 +45,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Get active alerts
-     * @returns {Promise<Array>} Active alerts
-     */
+    // Get all active alerts (for background monitoring)
     async getActiveAlerts() {
         try {
             return await this.alertRepository.findActive();
@@ -82,11 +55,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * List all alerts with pagination
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Alerts and pagination info
-     */
+    // List alerts with pagination
     async listAlerts(options = {}) {
         try {
             return await this.alertRepository.findAll(options);
@@ -96,12 +65,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Update alert
-     * @param {string} alertId - Alert ID
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object>} Updated alert
-     */
+    // Update alert
     async updateAlert(alertId, updateData) {
         try {
             const alert = await this.alertRepository.update(alertId, updateData);
@@ -118,11 +82,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Delete alert
-     * @param {string} alertId - Alert ID
-     * @returns {Promise<boolean>} Success status
-     */
+    // Delete alert
     async deleteAlert(alertId) {
         try {
             const success = await this.alertRepository.delete(alertId);
@@ -139,12 +99,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Check and trigger alerts for a symbol
-     * @param {string} symbol - Asset symbol
-     * @param {number} currentPrice - Current price
-     * @returns {Promise<Array>} Triggered alerts
-     */
+    // Check if price triggers any alerts for a symbol
     async checkAndTriggerAlerts(symbol, currentPrice) {
         try {
             return await this.alertRepository.checkAndTrigger(symbol, currentPrice);
@@ -154,10 +109,7 @@ export class AlertService {
         }
     }
 
-    /**
-     * Deactivate expired alerts
-     * @returns {Promise<number>} Number of deactivated alerts
-     */
+    // Deactivate expired alerts (cleanup job)
     async deactivateExpiredAlerts() {
         try {
             return await this.alertRepository.deactivateExpired();

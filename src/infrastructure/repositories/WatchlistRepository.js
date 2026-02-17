@@ -1,21 +1,9 @@
-/**
- * Global-Fi Ultra - Watchlist Repository
- * 
- * Database operations for Watchlist model.
- */
+// Watchlist repository for database operations
 
 import { Watchlist } from '../../models/index.js';
 import { logger } from '../../config/logger.js';
 
-/**
- * Watchlist Repository
- */
 export class WatchlistRepository {
-    /**
-     * Create a new watchlist
-     * @param {Object} watchlistData - Watchlist data
-     * @returns {Promise<Object>} Created watchlist
-     */
     async create(watchlistData) {
         try {
             const watchlist = new Watchlist(watchlistData);
@@ -28,12 +16,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Find watchlist by ID
-     * @param {string} id - Watchlist ID
-     * @param {boolean} populate - Whether to populate user data
-     * @returns {Promise<Object|null>} Watchlist or null
-     */
     async findById(id, populate = false) {
         try {
             let query = Watchlist.findById(id);
@@ -49,12 +31,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Find watchlists by user ID
-     * @param {string} userId - User ID
-     * @param {Object} options - Query options
-     * @returns {Promise<Array>} Watchlists
-     */
     async findByUserId(userId, { sort = '-createdAt', limit = 100 } = {}) {
         try {
             return await Watchlist.find({ userId })
@@ -67,11 +43,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Find all watchlists with pagination
-     * @param {Object} options - Query options
-     * @returns {Promise<Object>} Watchlists and pagination info
-     */
     async findAll({ page = 1, limit = 20, filter = {}, sort = '-createdAt' } = {}) {
         try {
             const skip = (page - 1) * limit;
@@ -101,12 +72,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Update watchlist by ID
-     * @param {string} id - Watchlist ID
-     * @param {Object} updateData - Update data
-     * @returns {Promise<Object|null>} Updated watchlist or null
-     */
     async update(id, updateData) {
         try {
             const watchlist = await Watchlist.findByIdAndUpdate(
@@ -126,13 +91,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Add asset to watchlist
-     * @param {string} id - Watchlist ID
-     * @param {string} symbol - Asset symbol
-     * @param {string} notes - Optional notes
-     * @returns {Promise<Object|null>} Updated watchlist or null
-     */
     async addAsset(id, symbol, notes = '') {
         try {
             const watchlist = await Watchlist.findById(id);
@@ -151,12 +109,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Remove asset from watchlist
-     * @param {string} id - Watchlist ID
-     * @param {string} symbol - Asset symbol
-     * @returns {Promise<Object|null>} Updated watchlist or null
-     */
     async removeAsset(id, symbol) {
         try {
             const watchlist = await Watchlist.findById(id);
@@ -175,11 +127,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Delete watchlist by ID
-     * @param {string} id - Watchlist ID
-     * @returns {Promise<boolean>} Success status
-     */
     async delete(id) {
         try {
             const result = await Watchlist.findByIdAndDelete(id);
@@ -196,13 +143,6 @@ export class WatchlistRepository {
         }
     }
 
-    /**
-     * Check if watchlist name exists for user
-     * @param {string} userId - User ID
-     * @param {string} name - Watchlist name
-     * @param {string} excludeId - Watchlist ID to exclude
-     * @returns {Promise<boolean>} True if exists
-     */
     async nameExistsForUser(userId, name, excludeId = null) {
         try {
             const query = { userId, name };
