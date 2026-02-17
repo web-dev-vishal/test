@@ -37,6 +37,16 @@ export class UserRepository {
         }
     }
 
+    // Find user by email with password field (for login)
+    async findByEmailWithPassword(email) {
+        try {
+            return await User.findOne({ email: email.toLowerCase() }).select('+passwordHash');
+        } catch (error) {
+            logger.error('Error finding user by email with password', { email, error: error.message });
+            throw error;
+        }
+    }
+
     // Find all users with pagination
     async findAll({ page = 1, limit = 20, filter = {}, sort = '-createdAt' } = {}) {
         try {

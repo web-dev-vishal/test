@@ -10,6 +10,7 @@
  * | GET    | /           | listUsers    | List users (paginated)   |
  * | GET    | /:id        | getUser      | Get single user by ID    |
  * | POST   | /           | createUser   | Create new user account  |
+ * | POST   | /login      | loginUser    | Login with credentials   |
  * | PUT    | /:id        | updateUser   | Full update of user      |
  * | PATCH  | /:id        | patchUser    | Partial update of user   |
  * | DELETE | /:id        | deleteUser   | Soft-delete user         |
@@ -37,6 +38,7 @@ import {
     getUserSchema,
     deleteUserSchema,
     listUsersSchema,
+    loginSchema,
 } from '../validators/userSchemas.js';
 
 /**
@@ -60,6 +62,10 @@ export const createUserRoutes = (controller) => {
     // POST /users — Create a new user account
     // Additional auth rate limiter (5/15min) to prevent mass account creation
     router.post('/', authRateLimiter, validateRequest(createUserSchema), (req, res, next) => controller.createUser(req, res, next));
+
+    // POST /users/login — Login with email and password
+    // Auth rate limiter (5/15min) to prevent brute force attacks
+    router.post('/login', authRateLimiter, validateRequest(loginSchema), (req, res, next) => controller.loginUser(req, res, next));
 
     // PUT /users/:id — Full update of user (all fields required)
     router.put('/:id', validateRequest(updateUserSchema), (req, res, next) => controller.updateUser(req, res, next));

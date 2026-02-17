@@ -82,6 +82,17 @@ export const listUsersSchema = z.object({
     }),
 });
 
+export const loginSchema = z.object({
+    body: z.object({
+        email: z.string()
+            .email('Invalid email address')
+            .toLowerCase()
+            .trim(),
+        password: z.string()
+            .min(1, 'Password is required'),
+    }),
+});
+
 export default {
     createUserSchema,
     updateUserSchema,
@@ -89,4 +100,5 @@ export default {
     getUserSchema,
     deleteUserSchema,
     listUsersSchema,
+    loginSchema,
 };

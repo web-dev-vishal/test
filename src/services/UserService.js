@@ -110,6 +110,41 @@ export class UserService {
             throw error;
         }
     }
+
+    // Login user - validates credentials and returns user data
+    async loginUser(email, password) {
+        try {
+            // Find user by email with password field included
+            const user = await this.userRepository.findByEmailWithPassword(email);
+
+            if (!user) {
+                throw new Error('Invalid credentials');
+            }
+
+            // Check if user is active
+            if (!user.isActive) {
+                throw new Error('Account is inactive');
+            }
+
+            // Compare password
+            const isPasswordValid = await user.comparePassword(password);
+
+            if (!isPasswordValid) {
+                throw new Error('Invalid credentials');
+            }
+
+            logger.info('User logged in successfully', { userId: user._id, email });
+
+            // Remove password hash from response
+            const userObj = user.toObject();
+            delete userObj.passwordHash;
+
+            return userObj;
+        } catch (error) {
+            logger.error('Error in loginUser', { email, error: error.message });
+            throw error;
+        }
+    }
 }
 
 export default UserService;

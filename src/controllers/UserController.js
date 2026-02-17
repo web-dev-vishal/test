@@ -130,6 +130,36 @@ export class UserController {
             next(error);
         }
     }
+
+    // Login user with email and password
+    async loginUser(req, res, next) {
+        try {
+            const { email, password } = req.body;
+
+            const user = await this.userService.loginUser(email, password);
+
+            res.json({
+                requestId: req.requestId,
+                timestamp: new Date().toISOString(),
+                message: 'Login successful',
+                user,
+            });
+        } catch (error) {
+            if (error.message === 'Invalid credentials') {
+                return res.status(401).json({
+                    error: 'Invalid email or password',
+                    requestId: req.requestId,
+                });
+            }
+            if (error.message === 'Account is inactive') {
+                return res.status(403).json({
+                    error: 'Account is inactive',
+                    requestId: req.requestId,
+                });
+            }
+            next(error);
+        }
+    }
 }
 
 export default UserController;
