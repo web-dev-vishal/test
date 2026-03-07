@@ -139,7 +139,8 @@ export class UserService {
             const userObj = user.toObject();
             delete userObj.passwordHash;
 
-            return userObj;
+            // Return { user } so UserController can destructure result.user correctly
+            return { user: userObj };
         } catch (error) {
             logger.error('Error in loginUser', { email, error: error.message });
             throw error;

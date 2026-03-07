@@ -96,20 +96,22 @@ userSchema.set('toJSON', { virtuals: true });
 userSchema.set('toObject', { virtuals: true });
 
 // Method to compare password with hash
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
     if (!this.passwordHash) {
         return false;
     }
-    
+
     // Import bcrypt dynamically to avoid loading it if not needed
+    // import() returns the module namespace { default: bcryptLib }, so use .default
     const bcrypt = await import('bcrypt');
-    return bcrypt.compare(candidatePassword, this.passwordHash);
+    return bcrypt.default.compare(candidatePassword, this.passwordHash);
 };
 
 // Static method to hash password
-userSchema.statics.hashPassword = async function(password) {
+userSchema.statics.hashPassword = async function (password) {
+    // import() returns the module namespace { default: bcryptLib }, so use .default
     const bcrypt = await import('bcrypt');
-    return bcrypt.hash(password, 10);
+    return bcrypt.default.hash(password, 10);
 };
 
 export const User = mongoose.model('User', userSchema);

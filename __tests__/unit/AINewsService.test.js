@@ -4,7 +4,19 @@
  * @jest-environment node
  */
 
-import { AINewsService } from '../../src/application/services/AINewsService.js';
+import { jest } from '@jest/globals';
+
+// Mock logger to prevent real config/winston initialization during tests
+jest.unstable_mockModule('../../src/config/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
+
+const { AINewsService } = await import('../../src/services/AINewsService.js');
 
 describe('AINewsService', () => {
   let service;

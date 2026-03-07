@@ -330,7 +330,9 @@ export class Container {
      * @returns {boolean} True if AIController was successfully created
      */
     isAIEnabled() {
-        return this.instances.get('aiController') !== null;
+        // Map.get() returns undefined (not null) if key was never set,
+        // so use loose inequality to catch both null and undefined
+        return this.instances.get('aiController') != null;
     }
 
     /**
